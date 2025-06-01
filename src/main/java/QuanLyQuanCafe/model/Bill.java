@@ -17,6 +17,13 @@ public class Bill {
         paid = false;
 
     }
+    public Bill(int tableid, int discount, double totalPrice, boolean ispaid) {
+        orderDate = LocalDateTime.now();
+        paid = ispaid;
+        disCount = discount;
+        tableID = tableid;
+
+    }
 
     public LocalDateTime getPaidDate() {
         return paidDate;

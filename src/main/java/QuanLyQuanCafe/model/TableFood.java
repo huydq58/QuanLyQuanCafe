@@ -11,9 +11,10 @@ public class TableFood {
     public TableFood() {
     }
 
-    public TableFood(int id, String name, boolean status) {
+
+    public TableFood(int id, String tablename ,boolean status) {
         this.id = id;
-        this.name = name;
+        this.name = tablename;
         this.status = status;
     }
 

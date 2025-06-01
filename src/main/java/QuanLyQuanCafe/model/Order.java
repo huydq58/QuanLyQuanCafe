@@ -9,6 +9,13 @@ public class Order {
 
     public Order() {}
 
+    public Order(int billid,int foodid,long newqty) {
+        this.billID = billid;
+        this.foodID = foodid;
+        this.count = newqty;
+    }
+
+
     public int getId() {
         return id;
     }
