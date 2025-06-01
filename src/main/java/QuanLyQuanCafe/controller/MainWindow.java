@@ -142,111 +142,40 @@ public class MainWindow implements Initializable {
         FoodDAL foodDAL = new FoodDAL(provider);
         List<Food> foods = foodDAL.getAllFood();
 
-            for (Food food : foods) {
-            VBox vBox = new VBox();
-
-            vBox.setPrefWidth(100);
-            vBox.setPrefHeight(100);
-            vBox.setAlignment(Pos.CENTER);
-
-            StackPane stackPane = new StackPane();
-
-            ImageView imageView = new ImageView();
-            imageView.setFitWidth(100);
-            imageView.setFitHeight(100);
-
-            imageViews.add(imageView);
-
-            File imageFile = new File(food.getImagePath());
-
-            Image image = new Image(imageFile.toURI().toString());
-
-            imageView.setImage(image);
-
-            ToggleButton b = new ToggleButton();
-            b.setToggleGroup(foodBtbGroup);
-            b.setPrefHeight(100);
-            b.setPrefWidth(100);
-            b.setOpacity(0);
-            b.setUserData(food.getId());
-
-            stackPane.getChildren().add(imageView);
-            stackPane.getChildren().add(b);
-
-            vBox.getChildren().add(stackPane);
-
-            Label label = new Label(food.getName());
-            label.setWrapText(true);
-            vBox.getChildren().add(label);
-
-            danhSachMon.getChildren().add(vBox);
-//
+        for (Food food : foods) {
+            loadFoodItem(food);
         }
         System.out.println("So luong mon: " + danhSachMon.getChildren().size());
+
     }
 
     private void loadCategories() {
-//        categoryChoiceBox.getItems().clear();
-//        categoryChoiceBox.getItems().addAll(ShopDB.categories);
+        DataProvider provider = new DataProvider();
+        CategoryDAL categoryDAL = new CategoryDAL(provider);
+        List<Category> categories = categoryDAL.getAllCategories();
+        categoryChoiceBox.getItems().clear();
+        categoryChoiceBox.getItems().addAll(categories);
     }
 
     private void updateFoodDisplay(Category selectedCategory) {
-//        // Clear the FlowPane first
-//        danhSachMon.getChildren().clear();
-//
-//        // Get the foods based on selected category
-//        List<Food> foodsToDisplay = selectedCategory == null
-//                ? ShopDB.foods
-//                : ShopDB.foods.stream()
-//                .filter(food -> food.getCategoryId() == selectedCategory.getId())
-//                .collect(Collectors.toList());
-//
-//        imageViews.clear();
-//
-//        // Create buttons for each food item and add to FlowPane
-//        for (Food food : foodsToDisplay) {
-//            VBox vBox = new VBox();
-//
-//            vBox.setPrefWidth(100);
-//            vBox.setPrefHeight(100);
-//            vBox.setAlignment(Pos.CENTER);
-//
-//            StackPane stackPane = new StackPane();
-//
-//            ImageView imageView = new ImageView();
-//            imageView.setFitWidth(100);
-//            imageView.setFitHeight(100);
-//
-//            imageViews.add(imageView);
-//
-//            File imageFile = new File("images/" + food.getImgName());
-//
-//            System.out.println(imageFile.toURI().toString());
-//
-//            Image image = new Image(imageFile.toURI().toString());
-//
-//            imageView.setImage(image);
-//
-//            ToggleButton b = new ToggleButton();
-//            b.setToggleGroup(foodBtbGroup);
-//            b.setPrefHeight(100);
-//            b.setPrefWidth(100);
-//            b.setOpacity(0);
-//            b.setUserData(food.getId());
-//            b.setOnAction(event -> chonFood(event, imageView));
-//
-//            stackPane.getChildren().add(imageView);
-//            stackPane.getChildren().add(b);
-//
-//            vBox.getChildren().add(stackPane);
-//
-//            Label label = new Label(food.getName());
-//            label.setWrapText(true);
-//            vBox.getChildren().add(label);
-//
-//            danhSachMon.getChildren().add(vBox);
-//        }
-//        System.out.println("So luong mon: " + danhSachMon.getChildren());
+        // Clear the FlowPane first
+        danhSachMon.getChildren().clear();
+        DataProvider provider = new DataProvider();
+        FoodDAL foodDAL = new FoodDAL(provider);
+        List<Food> foods = foodDAL.getAllFood();
+        // Get the foods based on selected category
+        List<Food> foodsToDisplay = selectedCategory == null
+                ? foods
+                : foods.stream()
+                .filter(food -> food.getCategoryId() == selectedCategory.getId())
+                .collect(Collectors.toList());
+
+        imageViews.clear();
+        for (Food food : foodsToDisplay) {
+            loadFoodItem(food);
+
+        }
+
     }
 
     @FXML
@@ -568,5 +497,43 @@ public class MainWindow implements Initializable {
     private void gotoLoginScreen() throws IOException {
         App.setRoot("login");
     }
+    private void loadFoodItem(Food food){
 
+        VBox vBox = new VBox();
+        vBox.setPrefWidth(100);
+        vBox.setPrefHeight(100);
+        vBox.setAlignment(Pos.CENTER);
+
+        StackPane stackPane = new StackPane();
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(100);
+        imageView.setFitHeight(100);
+
+        imageViews.add(imageView);
+
+        File imageFile = new File(food.getImagePath());
+
+        Image image = new Image(imageFile.toURI().toString());
+
+        imageView.setImage(image);
+
+        ToggleButton b = new ToggleButton();
+        b.setToggleGroup(foodBtbGroup);
+        b.setPrefHeight(100);
+        b.setPrefWidth(100);
+        b.setOpacity(0);
+        b.setUserData(food.getId());
+
+        stackPane.getChildren().add(imageView);
+        stackPane.getChildren().add(b);
+
+        vBox.getChildren().add(stackPane);
+
+        Label label = new Label(food.getName());
+        label.setWrapText(true);
+        vBox.getChildren().add(label);
+
+        danhSachMon.getChildren().add(vBox);
+    }
 }
