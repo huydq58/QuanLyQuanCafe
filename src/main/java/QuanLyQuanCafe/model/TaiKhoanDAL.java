@@ -38,22 +38,22 @@ public class TaiKhoanDAL {
         return list;
     }
 
-    public boolean getIsAdminByMaNV(int maNV) {
-        String query = "SELECT IsAdmin FROM NhanVien WHERE MaNV = ?";
-        try (Connection conn = dataProvider.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setInt(1, maNV);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getBoolean("IsAdmin");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+//    public boolean getIsAdminByMaNV(int maNV) {
+//        String query = "SELECT IsAdmin FROM NhanVien WHERE MaNV = ?";
+//        try (Connection conn = dataProvider.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(query)) {
+//
+//            stmt.setInt(1, maNV);
+//            ResultSet rs = stmt.executeQuery();
+//
+//            if (rs.next()) {
+//                return rs.getBoolean("IsAdmin");
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//    }
 
     public TaiKhoan getTaiKhoanByUsername(String username) {
         String query = "SELECT TenDangNhap, MatKhauHash, MaNV FROM TaiKhoan WHERE TenDangNhap = ?";

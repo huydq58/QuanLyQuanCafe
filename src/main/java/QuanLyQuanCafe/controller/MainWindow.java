@@ -180,7 +180,7 @@ public class MainWindow implements Initializable {
             vBox.getChildren().add(label);
 
             danhSachMon.getChildren().add(vBox);
-
+//
         }
         System.out.println("So luong mon: " + danhSachMon.getChildren().size());
     }
