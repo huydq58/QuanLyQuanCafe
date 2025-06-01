@@ -59,17 +59,17 @@ public class LoginController {
                 return;
             }
 
-            // 3. Kiểm tra quyền nếu cần (ví dụ: admin)
-            boolean isAdmin = false;
-            if (tk.getMaNV() != null) {
-                isAdmin = taiKhoanDAL.getIsAdminByMaNV(tk.getMaNV());
-            }
+//            // 3. Kiểm tra quyền nếu cần (ví dụ: admin)
+//            boolean isAdmin = false;
+//            if (tk.getMaNV() != null) {
+//                isAdmin = taiKhoanDAL.getIsAdminByMaNV(tk.getMaNV());
+//            }
 
-            // ✅ Đăng nhập thành công
-            showAlert("Thành công", "Đăng nhập thành công!\nQuyền: " + (isAdmin ? "Admin" : "Nhân viên"));
+            // Đăng nhập thành công
+            showAlert("Thành công", "Đăng nhập thành công!");
 
             // 👉 TODO: chuyển sang giao diện chính
-            // loadMainScene(tk, isAdmin);
+             App.setRoot("MainWindow");
 
         } catch (Exception e) {
             e.printStackTrace();

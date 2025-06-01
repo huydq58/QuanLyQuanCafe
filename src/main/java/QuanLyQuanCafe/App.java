@@ -32,18 +32,22 @@ public class App extends Application{
             case "login":
                 scene.getWindow().setWidth(600);
                 scene.getWindow().setHeight(400);
+                scene.getWindow().centerOnScreen();
                 break;
-            case "mainScreen":
+            case "MainWindow":
                 scene.getWindow().setWidth(1050);
                 scene.getWindow().setHeight(650);
+                scene.getWindow().centerOnScreen();
                 break;
             case "AdminScreen":
                 scene.getWindow().setWidth(1000);
                 scene.getWindow().setHeight(650);
+                scene.getWindow().centerOnScreen();
                 break;
             default:
                 scene.getWindow().setWidth(600);
                 scene.getWindow().setHeight(400);
+                scene.getWindow().centerOnScreen();
                 break;
         }
 
