@@ -126,7 +126,7 @@
                                         <Cursor fx:constant="DEFAULT" />
                                     </cursor>
                                 </TextField>
-                                <Button mnemonicParsing="false"  style="-fx-background-color: #a97550;" text="Áp Khuyến Mãi" textAlignment="CENTER" textFill="WHITE">
+                                <Button mnemonicParsing="false"  style="-fx-background-color: #a97550;" text="Áp Khuyến Mãi" onAction="#apKhuyenMai" textAlignment="CENTER" textFill="WHITE">
                                     <HBox.margin>
                                         <Insets left="20.0" />
                                     </HBox.margin>

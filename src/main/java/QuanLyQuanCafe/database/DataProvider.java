@@ -37,12 +37,13 @@ public class DataProvider {
         }
     }
 
-    public ResultSet executeQuery(String query, Object[] params) throws SQLException {
+    public ResultSet executeQuery(String sql, Object... params) throws SQLException {
         Connection conn = getConnection();
-        PreparedStatement stmt = conn.prepareStatement(query);
+        PreparedStatement stmt = conn.prepareStatement(sql);
         setParameters(stmt, params);
-        return stmt.executeQuery(); // Gọi xong nhớ đóng từ lớp sử dụng
+        return stmt.executeQuery(); // Đừng quên đóng conn và stmt sau khi sử dụng
     }
+
 
     public int executeNonQuery(String query, Object[] params) throws SQLException {
         try (Connection conn = getConnection();
@@ -63,7 +64,40 @@ public class DataProvider {
             return null;
         }
     }
+    public int executeUpdate(String sql, Object... params) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            setParameters(stmt, params);
+
+            return stmt.executeUpdate();  // Trả về số dòng ảnh hưởng
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;  // Báo lỗi
+        }
+    }
+    // Hàm trả về ID khi INSERT (dành cho insertBill chẳng hạn)
+    public int executeUpdateWithIdentity(String sql, Object... params) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            setParameters(stmt, params);
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);  // Trả về ID vừa thêm
+                }
+            }
+            return -1;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
     private void setParameters(PreparedStatement stmt, Object[] params) throws SQLException {
         if (params != null) {
             for (int i = 0; i < params.length; i++) {

@@ -13,6 +13,9 @@ import javafx.scene.layout.VBox;
 
 
 import QuanLyQuanCafe.model.*;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +35,7 @@ import java.io.IOException;
 
 public class MainWindow implements Initializable {
 
+    // <editor-fold desc="Khoi tao giao dien">
     @FXML
     private FlowPane danhSachBan;
 
@@ -82,6 +86,7 @@ public class MainWindow implements Initializable {
 
     @FXML
     private Button thanhToanButton;
+    // </editor-fold>
 
     private List<ImageView> imageViews = new ArrayList<>();
 
@@ -90,8 +95,6 @@ public class MainWindow implements Initializable {
 
         thanhToanButton.setDisable(true);
 
-
-
         loadTables();
         loadFoods();
         loadCategories();
@@ -99,6 +102,9 @@ public class MainWindow implements Initializable {
         setupOrderTable();
         // populateOrderTable();
         addFoodButton.setOnAction(event -> addFood());
+
+        // xử lý rs tại đây...
+
 
         quantitySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
 
@@ -112,7 +118,7 @@ public class MainWindow implements Initializable {
 
         App.setRoot("AdminScreen");
     }
-
+    //Load danh sach ban
     private void loadTables() {
         DataProvider provider = new DataProvider();
         TableFoodDAL tableDAL = new TableFoodDAL(provider);
@@ -126,17 +132,14 @@ public class MainWindow implements Initializable {
             b.setText(table.getName());
             b.setPrefWidth(80);
             b.setPrefHeight(80);
-
             b.setUserData(table.getId());
-
-            // On CLick thì sẽ truyền event vào chonTable()
-//            b.setOnAction(event -> chonTable(event));
+            b.setOnAction(event -> chonTable(event));
 
             danhSachBan.getChildren().add(b);
         }
 
     }
-
+    //Load tất cả món ăn
     private void loadFoods() {
         DataProvider provider = new DataProvider();
         FoodDAL foodDAL = new FoodDAL(provider);
@@ -148,7 +151,7 @@ public class MainWindow implements Initializable {
         System.out.println("So luong mon: " + danhSachMon.getChildren().size());
 
     }
-
+    //Load tất cả danh mục
     private void loadCategories() {
         DataProvider provider = new DataProvider();
         CategoryDAL categoryDAL = new CategoryDAL(provider);
@@ -156,7 +159,7 @@ public class MainWindow implements Initializable {
         categoryChoiceBox.getItems().clear();
         categoryChoiceBox.getItems().addAll(categories);
     }
-
+    //Update list thức ăn khi chọn danh mục
     private void updateFoodDisplay(Category selectedCategory) {
         // Clear the FlowPane first
         danhSachMon.getChildren().clear();
@@ -173,7 +176,6 @@ public class MainWindow implements Initializable {
         imageViews.clear();
         for (Food food : foodsToDisplay) {
             loadFoodItem(food);
-
         }
 
     }
@@ -219,52 +221,59 @@ public class MainWindow implements Initializable {
     }
 
     private int getBillIdByTableId(int tableId) {
-//        // Check ban co nguoi hay khong
-//        for (Table table : ShopDB.tables) {
-//            if (table.getId() == tableId) {
-//                if (table.getStatus() == TableStatus.USED) {
-//                    messageTableLabel.setText("Bàn " + tableId + " có khách!");
-//                } else {
-//                    messageTableLabel.setText("Bàn đang trống");
-//                }
-//            }
-//        }
-//        // Check co hoa don hay khong
-//        for (Bill bill : OrderBillDB.bills) {
-//            if (bill.getTableID() == tableId && !bill.isPaid()) {
-//                return bill.getId();
-//            }
-//        }
+        TableFoodDAL tableDAL = new TableFoodDAL(new DataProvider());
+        List<TableFood> tables = tableDAL.getAllTables();
+
+        for (TableFood table : tables) {
+            if (table.getId() == tableId) {
+                if (!table.isAvailable()) {
+                    messageTableLabel.setText("Bàn " + tableId + " có khách!");
+                } else {
+                    messageTableLabel.setText("Bàn đang trống");
+                }
+            }
+        }
+        BillDAL billDAL = new BillDAL(new DataProvider());
+        List<Bill> bills = billDAL.getAllBills();
+        // Check co hoa don hay khong
+        for (Bill bill : bills) {
+            if (bill.getTableID() == tableId && !bill.isPaid()) {
+                return bill.getId();
+            }
+        }
 
         return 0;
     }
 
     private double updateOrderTable(int tableId) {
-//        for (Bill bill : OrderBillDB.bills) {
-//            if (bill.getTableID() == tableId && !bill.isPaid()) {
-//                // Get the order items related to this bill ID
-//                orderItems = getOrderItemsForBill(bill.getId());
-//                ObservableList<OrderItemView> observableList = FXCollections.observableArrayList(orderItems);
-//
-//                // Update the TableView with the filtered order items
-//                bangHoaDon.setItems(observableList);
-//
-//                bangHoaDon.refresh();
-//
-//                // Break the loop since we've found the matching bill
-//                break;
-//            } else {
-//                bangHoaDon.getItems().clear();
-//            }
-//        }
-//
-//        double totalPriceLocal = 0;
-//
-//        for (OrderItemView orderItem : orderItems) {
-//            totalPriceLocal += orderItem.getTotalPrice();
-//        }
-//
-//        totalPrice.setText(convertToVND(totalPriceLocal));
+        BillDAL billDAL = new BillDAL(new DataProvider());
+        List<Bill> bills = billDAL.getAllBills();
+
+        for (Bill bill : bills) {
+            if (bill.getTableID() == tableId && !bill.isPaid()) {
+                // Get the order items related to this bill ID
+                orderItems = getOrderItemsForBill(bill.getId());
+                ObservableList<OrderItemView> observableList = FXCollections.observableArrayList(orderItems);
+
+                // Update the TableView with the filtered order items
+                bangHoaDon.setItems(observableList);
+
+                bangHoaDon.refresh();
+
+                // Break the loop since we've found the matching bill
+                break;
+            } else {
+                bangHoaDon.getItems().clear();
+            }
+        }
+
+        double totalPriceLocal = 0;
+
+        for (OrderItemView orderItem : orderItems) {
+            totalPriceLocal += orderItem.getTotalPrice();
+        }
+
+        totalPrice.setText(convertToVND(totalPriceLocal));
 
         return 0;
     }
@@ -272,152 +281,175 @@ public class MainWindow implements Initializable {
     private List<OrderItemView> getOrderItemsForBill(int billId) {
         List<OrderItemView> orderItemViews = new ArrayList<>();
 
-//        // Iterate over orders to find those matching the bill ID
-//        for (Order order : OrderBillDB.orders) {
-//            if (order.getBillID() == billId) { // Filter by bill ID
-//                Food foundFood = null;
-//
-//                // Find the corresponding food item
-//                for (Food food : ShopDB.foods) {
-//                    if (food.getId() == order.getFoodID()) {
-//                        foundFood = food;
-//                        break; // Exit the loop once the food is found
-//                    }
-//                }
-//
-//                // Create an OrderItemView object if the food exists
-//                if (foundFood != null) {
-//                    OrderItemView itemView = new OrderItemView(foundFood.getName(), order.getCount(),
-//                            foundFood.getPrice(), foundFood.getId());
-//                    orderItemViews.add(itemView);
-//                }
-//            }
-//        }
+        OrderDAL orderDAL = new OrderDAL(new DataProvider());
+        List<Order> orders = orderDAL.getOrdersByBillID(billId); // ✅ Truy vấn theo billId
 
-        return orderItemViews; // Return the list of OrderItemView objects
+        // Tạo Map để tìm Food theo ID nhanh hơn O(1)
+        List<Food> foods = new FoodDAL(new DataProvider()).getAllFood();
+        Map<Integer, Food> foodMap = new HashMap<>();
+        for (Food food : foods) {
+            foodMap.put(food.getId(), food);
+        }
+
+        for (Order order : orders) {
+            Food foundFood = foodMap.get(order.getFoodID());
+
+            if (foundFood != null) {
+                OrderItemView itemView = new OrderItemView(
+                        foundFood.getName(),
+                        order.getCount(),
+                        foundFood.getPrice(),
+                        foundFood.getId()
+                );
+                orderItemViews.add(itemView);
+            }
+        }
+
+        return orderItemViews;
     }
 
     // Setup TableView columns
     private void setupOrderTable() {
-//        foodNameCol.setCellValueFactory(new PropertyValueFactory<>("foodName"));
-//        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-//        pricePerItemCol.setCellValueFactory(new PropertyValueFactory<>("pricePerItem"));
-//        totalPriceCol.setCellValueFactory(new PropertyValueFactory<>("totalPrice"));
-//
-//        quantityCol.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.LongStringConverter()));
-//
-//        quantityCol.setOnEditCommit(event -> {
-//            OrderItemView item = event.getRowValue(); // Get the current item
-//            long newQuantity = event.getNewValue(); // Get the new quantity
-//
-//            item.setQuantity(newQuantity); // Update the quantity in the model
-//
-//            // Optionally, you can update the total price here
-//            long pricePerItem = item.getPricePerItem();
-//            item.setTotalPrice(pricePerItem * newQuantity);
-//
-//            OrderBillDB.orders.stream()
-//                    .filter(orderInfo -> orderInfo.getBillID() == chosenBill
-//                            && orderInfo.getFoodID() == item.getFoodID()) // Use chosenBillID to identify the bill
-//                    .findFirst()
-//                    .ifPresent(orderInfo -> {
-//                        orderInfo.setCount(newQuantity); // Update quantity in OrderInfo
-//                    });
-//
-//            bangHoaDon.refresh(); // Refresh the TableView to show updated values
-//        });
+        foodNameCol.setCellValueFactory(new PropertyValueFactory<>("foodName"));
+        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        pricePerItemCol.setCellValueFactory(new PropertyValueFactory<>("pricePerItem"));
+        totalPriceCol.setCellValueFactory(new PropertyValueFactory<>("totalPrice"));
+
+        quantityCol.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.LongStringConverter()));
+
+        quantityCol.setOnEditCommit(event -> {
+            OrderItemView item = event.getRowValue();
+            long newQuantity = event.getNewValue();
+
+            if (newQuantity <= 0) {
+                // Không cho phép số lượng <= 0
+                showAlert("Số lượng không hợp lệ", "Vui lòng nhập số lượng lớn hơn 0.");
+                bangHoaDon.refresh();
+                return;
+            }
+
+            item.setQuantity(newQuantity);
+            long pricePerItem = item.getPricePerItem();
+            item.setTotalPrice(pricePerItem * newQuantity);
+
+            // Cập nhật trực tiếp vào CSDL thông qua OrderDAL
+            OrderDAL orderDAL = new OrderDAL(new DataProvider());
+            Order updatedOrder = new Order();
+            updatedOrder.setBillID(chosenBill);
+            updatedOrder.setFoodID(item.getFoodID());
+            updatedOrder.setCount(newQuantity);
+
+            boolean success = orderDAL.updateOrder(updatedOrder);
+            if (!success) {
+                showAlert("Lỗi cập nhật", "Không thể cập nhật số lượng món ăn.");
+            }
+
+            bangHoaDon.refresh();
+        });
     }
 
+
     // Tao list hoa don view tu Orders va Foods
-    // private List<OrderItemView> getOrderItems() {
-    // List<OrderItemView> orderItemViews = new ArrayList<>();
+    private List<OrderItemView> getOrderItems() {
+        List<OrderItemView> orderItemViews = new ArrayList<>();
+        OrderDAL orderDAL = new OrderDAL(new DataProvider());
+        List<Order> orders = orderDAL.getAllOrders();
 
-    // for (Order order : OrderBillDB.orders) {
-    // Food foundFood = null;
+        FoodDAL foodDAL = new FoodDAL(new DataProvider());
+        List<Food> foods = foodDAL.getAllFood();
 
-    // // Find the food by matching the ID in the foods list
-    // for (Food food : ShopDB.foods) {
-    // if (food.getId() == order.getFoodID()) {
-    // foundFood = food;
-    // break; // Exit the loop once the food is found
-    // }
-    // }
+        for (Order order : orders) {
+            Food foundFood = null;
+            // Find the food by matching the ID in the foods list
+            for (Food food : foods) {
+                if (food.getId() == order.getFoodID()) {
+                    foundFood = food;
+                    break;
+                }
+            }
 
-    // // If food is found, create and add OrderItemView to the list
-    // if (foundFood != null) {
-    // OrderItemView itemView = new OrderItemView(foundFood.getName(),
-    // order.getCount(), foundFood.getPrice(),
-    // foundFood.getId());
-    // orderItemViews.add(itemView);
-    // }
-    // }
+            // If food is found, create and add OrderItemView to the list
+            if (foundFood != null) {
+                OrderItemView itemView = new OrderItemView(foundFood.getName(),
+                        order.getCount(), foundFood.getPrice(),
+                        foundFood.getId());
+                orderItemViews.add(itemView);
+            }
+        }
 
-    // return orderItemViews; // Return the list of order item views
-    // }
+        return orderItemViews; // Return the list of order item views
+    }
 
     @FXML
     public void addFood() {
-//        Integer quantity = quantitySpinner.getValue();
-//
-//        // Check da chon table va chon food
-//        if (choseTable == 0) {
-//            System.out.println("Please select a table.");
-//            return;
-//        }
-//        if (choseFood == 0) {
-//            System.out.println("Please select a food item.");
-//            return;
-//        }
-//
-//        chosenBill = getBillIdByTableId(choseTable);
-//
-//        thanhToanButton.setDisable(false);
-//
-//        // Tao hoa don moi neu ban khong co khach
-//        if (chosenBill == 0) {
-//            Bill newBill = new Bill();
-//            newBill.setTableID(choseTable);
-//            newBill.setDisCount(0);
-//            newBill.setTotalPrice(0);
-//            OrderBillDB.bills.add(newBill);
-//
-//            chosenBill = newBill.getId();
-//
-//            for (Table table : ShopDB.tables) {
-//                if (table.getId() == choseTable) {
-//                    table.setStatus(TableStatus.USED);
-//                    messageTableLabel.setText("Bàn " + choseTable + " có khách!");
-//                    break;
-//                }
-//            }
-//
-//            System.out.println("New Bill: ID = " + newBill.getId());
-//        }
-//
-//        // Create a new Order entry
-//        Order newOrder = new Order();
-//        newOrder.setBillID(chosenBill);
-//        newOrder.setFoodID(choseFood);
-//        newOrder.setCount(quantity);
-//
-//        // Add to order info list and update the display
-//        OrderBillDB.orders.add(newOrder);
-//
-//        double totalPriceLocal = 0;
-//
-//        totalPriceLocal = updateOrderTable(choseTable); // Refresh the table view
-//
-//        totalPrice.setText(convertToVND(totalPriceLocal));
-//
-//        quantitySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
-//
-//        System.out
-//                .println("Added food ID: " + choseFood + " with quantity: " + quantity + " to table ID: " + choseTable
-//                        + " with bill ID: " + chosenBill);
-//
-//        updateOrderTable(choseTable);
+        Integer quantity = quantitySpinner.getValue();
+        if (choseTable == 0) {
+            showAlert("Chưa chọn bàn", "Vui lòng chọn bàn.");
+            return;
+        }
+        if (choseFood == 0) {
+            showAlert("Chưa chọn món", "Vui lòng chọn món ăn.");
+            return;
+        }
 
+        BillDAL billDAL = new BillDAL(new DataProvider());
+        TableFoodDAL tableDAL = new TableFoodDAL(new DataProvider());
+        OrderDAL orderDAL = new OrderDAL(new DataProvider());
+
+        try {
+            chosenBill = getBillIdByTableId(choseTable);
+            thanhToanButton.setDisable(false);
+            System.out.println("chosenBill: " + chosenBill);
+            System.out.println("chosenTable: " + choseTable);
+
+            if (chosenBill == 0) {
+                Bill newBill = new Bill();
+                newBill.setTableID(choseTable);
+                newBill.setDisCount(0);
+                newBill.setTotalPrice(0);
+                newBill.setPaid(false);
+
+                int generatedBillId = billDAL.insertBill(newBill);
+                if (generatedBillId == -1) {
+                    showAlert("Lỗi", "Không thể tạo hóa đơn mới.");
+                    return;
+                }
+
+                chosenBill = generatedBillId;
+
+                TableFood tableFood = tableDAL.getTableById(choseTable);
+                tableFood.setAvailable(false);
+                tableDAL.updateTable(tableFood);  // Cập nhật trạng thái trong DB
+
+                messageTableLabel.setText("Bàn " + choseTable + " có khách!");
+                System.out.println("Tạo hóa đơn mới ID: " + chosenBill);
+            }
+
+            Order newOrder = new Order();
+            newOrder.setBillID(chosenBill);
+            newOrder.setFoodID(choseFood);
+            newOrder.setCount(quantity);
+
+            if (orderDAL.existsOrder(chosenBill, choseFood)) {
+                orderDAL.increaseQuantity(chosenBill, choseFood, quantity);
+            } else {
+                orderDAL.insertOrder(newOrder);
+            }
+
+            double totalPriceLocal = updateOrderTable(choseTable);
+            totalPrice.setText(convertToVND(totalPriceLocal));
+            quantitySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
+
+            System.out.println("Thêm món ID: " + choseFood + ", SL: " + quantity + " vào bàn ID: " + choseTable);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Lỗi CSDL", "Có lỗi xảy ra khi thao tác với cơ sở dữ liệu: " + e.getMessage());
+        }
     }
+
+
+
 
     @FXML
     public void thanhToan() {
@@ -459,26 +491,28 @@ public class MainWindow implements Initializable {
 
     @FXML
     public void apKhuyenMai() {
-//        for (Bill bill : OrderBillDB.bills) {
-//            if (bill.getId() == chosenBill) {
-//
-//                int discount = Integer.parseInt(discountField.getText());
-//
-//                bill.setDisCount(discount);
-//
-//                double totalPriceLocal = 0;
-//
-//                for (OrderItemView orderItem : orderItems) {
-//                    totalPriceLocal += orderItem.getTotalPrice();
-//                }
-//
-//                double newTotalPrice = totalPriceLocal - (totalPriceLocal * (discount / 100.0));
-//
-//                bill.setTotalPrice(newTotalPrice);
-//
-//                totalPrice.setText(convertToVND(newTotalPrice));
-//            }
-//        }
+        BillDAL billDAL = new BillDAL(new DataProvider());
+        List<Bill> bills = billDAL.getAllBills();
+        for (Bill bill : bills) {
+            if (bill.getId() == chosenBill) {
+
+                int discount = Integer.parseInt(discountField.getText());
+
+                bill.setDisCount(discount);
+
+                double totalPriceLocal = 0;
+
+                for (OrderItemView orderItem : orderItems) {
+                    totalPriceLocal += orderItem.getTotalPrice();
+                }
+
+                double newTotalPrice = totalPriceLocal - (totalPriceLocal * (discount / 100.0));
+
+                bill.setTotalPrice(newTotalPrice);
+
+                totalPrice.setText(convertToVND(newTotalPrice));
+            }
+        }
     }
 
     private String convertToVND(double money) {
@@ -524,6 +558,8 @@ public class MainWindow implements Initializable {
         b.setPrefWidth(100);
         b.setOpacity(0);
         b.setUserData(food.getId());
+        b.setOnAction(event -> chonFood(event, imageView));
+
 
         stackPane.getChildren().add(imageView);
         stackPane.getChildren().add(b);
@@ -536,4 +572,12 @@ public class MainWindow implements Initializable {
 
         danhSachMon.getChildren().add(vBox);
     }
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }

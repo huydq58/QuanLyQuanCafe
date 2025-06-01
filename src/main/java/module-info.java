@@ -5,6 +5,7 @@ module org.example.quanlyquancafe {
     requires java.sql;
     requires jbcrypt;
 
+    opens QuanLyQuanCafe.model to javafx.base, javafx.fxml;  // mở package model cho javafx.base (và fxml nếu cần)
 
     opens QuanLyQuanCafe to javafx.fxml;
     exports QuanLyQuanCafe;
