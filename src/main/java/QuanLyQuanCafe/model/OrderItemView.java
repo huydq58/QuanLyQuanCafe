@@ -3,13 +3,15 @@ package QuanLyQuanCafe.model;
 public class OrderItemView {
 
     private String foodName;
+    private int orderId;
     private long quantity;
     private long pricePerItem;
     private long totalPrice;
     private int foodID;
 
-    public OrderItemView(String foodName, long quantity, long pricePerItem, int foodID) {
+    public OrderItemView(String foodName, int orderId, long quantity, long pricePerItem, int foodID) {
         this.foodName = foodName;
+        this.orderId = orderId;
         this.quantity = quantity;
         this.pricePerItem = pricePerItem;
         this.foodID = foodID;
@@ -23,6 +25,10 @@ public class OrderItemView {
     public void setFoodID(int foodID) {
         this.foodID = foodID;
     }
+
+    public int getOrderId() {return orderId;}
+
+    public void setOrderId(int orderId) {this.orderId = orderId;}
 
     public String getFoodName() {
         return foodName;
@@ -55,5 +61,6 @@ public class OrderItemView {
     public void setTotalPrice(long totalPrice) {
         this.totalPrice = totalPrice;
     }
+
 
 }

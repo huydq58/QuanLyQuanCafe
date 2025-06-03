@@ -39,6 +39,7 @@ public class MainWindow implements Initializable {
     @FXML private Spinner<Integer> quantitySpinner;
     @FXML private Button addFoodButton, gotoAdminButton, thanhToanButton;
     @FXML private TextField totalPrice, discountField;
+    @FXML private TableColumn<OrderItemView, Void> deleteCol;
 
     private int choseTable, choseFood, chosenBill;
     private final ToggleGroup tableBtnGroup = new ToggleGroup(), foodBtbGroup = new ToggleGroup();
@@ -52,7 +53,7 @@ public class MainWindow implements Initializable {
         totalPrice.setText("");
         loadTables(); loadFoods(); loadCategories();
         setupOrderTable();
-
+        setupDeleteColumn();
         addFoodButton.setOnAction(event -> addFood());
         quantitySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
         categoryChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateFoodDisplay(newVal));
@@ -130,7 +131,7 @@ public class MainWindow implements Initializable {
         Map<Integer, Food> foodMap = new FoodDAL(provider).getAllFood().stream().collect(Collectors.toMap(Food::getId, f -> f));
         return orders.stream().map(o -> {
             Food f = foodMap.get(o.getFoodID());
-            return new OrderItemView(f.getName(), o.getCount(), f.getPrice(), f.getId());
+            return new OrderItemView(f.getName(),o.getId(), o.getCount(), f.getPrice(), f.getId());
         }).collect(Collectors.toList());
     }
     //Tạo danh sách món đã gọi vào hóa đơn
@@ -176,45 +177,80 @@ public class MainWindow implements Initializable {
         }
     }
     //Xử lý logic nút thanh toán
-    @FXML public void thanhToan() {
+    @FXML
+    public void thanhToan() {
         BillDAL billDAL = new BillDAL(provider);
-        List<Bill> bills = billDAL.getAllBills();
         TableFoodDAL tableDAL = new TableFoodDAL(provider);
-        List<TableFood> tables = tableDAL.getAllTables();
 
-        for (TableFood table : tables) {
-            if (table.getId() == choseTable) {
-                table.setAvailable(true);
-
-                for (Bill bill : bills) {
-                    if (bill.getId() == chosenBill) {
-
-                        double totalPriceLocal = 0;
-
-                        if (bill.getDisCount() > 0) {
-                            totalPriceLocal = bill.getTotalPrice();
-                        } else {
-                            for (OrderItemView orderItem : orderItems) {
-                                totalPriceLocal += orderItem.getTotalPrice();
-                            }
-                        }
-
-                        bill.setPaid(true);
-                        bill.setPaidDate(LocalDateTime.now());
-                        bill.setTotalPrice(totalPriceLocal);
-                    }
-                }
-
-                discountField.setText("0");
-                totalPrice.setText("0");
-                bangHoaDon.getItems().clear();
-                thanhToanButton.setDisable(true);
-
-
-            }
+        // 1. Cập nhật trạng thái bàn
+        TableFood table = tableDAL.getTableById(choseTable);
+        if (table != null) {
+            table.setAvailable(true);
+            tableDAL.updateTable(table); // Cập nhật vào DB
         }
+
+        // 2. Cập nhật hóa đơn
+        Bill bill = billDAL.getBillById(chosenBill);
+        if (bill != null) {
+            double totalPriceLocal = 0;
+
+            if (bill.getDisCount() > 0) {
+                totalPriceLocal = bill.getTotalPrice();
+            } else {
+                for (OrderItemView orderItem : orderItems) {
+                    totalPriceLocal += orderItem.getTotalPrice();
+                }
+            }
+
+            bill.setPaid(true);
+            bill.setPaidDate(LocalDateTime.now());
+            bill.setTotalPrice(totalPriceLocal);
+
+            billDAL.updateBill(bill); // Cập nhật vào DB
+        }
+
+        // 3. Reset giao diện
+        discountField.setText("0");
+        totalPrice.setText("0");
+        bangHoaDon.getItems().clear();
+        thanhToanButton.setDisable(true);
     }
 
+    private void setupDeleteColumn() {
+        deleteCol.setCellFactory(col -> new TableCell<>() {
+            private final Button btn = new Button("Xóa");
+
+            {
+                btn.setStyle("-fx-background-color: #FF6666; -fx-text-fill: white; -fx-font-size: 10;");
+                btn.setOnAction(event -> {
+                    OrderItemView item = getTableView().getItems().get(getIndex());
+                    xoaItem(item);
+                });
+            }
+            private void xoaItem(OrderItemView item) {
+                OrderDAL orderDAL = new OrderDAL(provider);
+                boolean daXoa = orderDAL.deleteOrder(item.getOrderId());
+                if (daXoa) {
+                    bangHoaDon.getItems().remove(item);
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Lỗi");
+                    alert.setHeaderText(null);
+                    alert.setContentText(String.valueOf(item.getOrderId()));
+                    alert.showAndWait();
+                }
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btn);
+                }
+            }
+        });
+    }
     //Xử lý logic nút khuyến mãi
     @FXML public void apKhuyenMai() {
         int discount = Integer.parseInt(discountField.getText());

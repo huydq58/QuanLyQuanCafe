@@ -37,6 +37,22 @@
                             <stops>
                                 <Stop>
                                     <color>
+                                        <Color red="0.741" green="0.941" blue="0.980" /> <!-- Xanh nhạt -->
+                                    </color>
+                                </Stop>
+                                <Stop offset="1.0">
+                                    <color>
+                                        <Color red="0.502" green="0.776" blue="0.898" /> <!-- Xanh nhạt đậm hơn -->
+                                    </color>
+                                </Stop>
+                            </stops>
+                        </LinearGradient>
+                    </textFill>
+                    <textFill>
+                        <LinearGradient endX="1.0" endY="1.0" startX="1.0">
+                            <stops>
+                                <Stop>
+                                    <color>
                                         <Color red="1.0" green="0.7882353067398071" blue="0.6431372761726379" />
                                     </color>
                                 </Stop>
@@ -63,10 +79,13 @@
                                 <PasswordField fx:id="passwordField" />
                             </children>
                         </HBox>
-                        <Button mnemonicParsing="false" onAction="#handleLogin" prefHeight="26.0" prefWidth="206.0" style="-fx-background-color: #906d55;" text="Đăng nhập" textAlignment="CENTER" textFill="WHITE">
+                        <Button mnemonicParsing="false" onAction="#handleLogin" prefHeight="26.0" prefWidth="206.0"
+                                style="-fx-background-color: #ADD8E6;" text="Đăng nhập" textAlignment="CENTER" textFill="WHITE">
                             <font>
                                 <Font name="System Bold" size="14.0" />
-                            </font></Button>
+                            </font>
+                        </Button>
+
                         <Label fx:id="messageLabel" />
                     </children>
                 </VBox>
