@@ -176,7 +176,7 @@ public class FoodTabController {
         }
         int foodId = Integer.parseInt(foodIdField.getText());
 
-        // Save new food info
+        // Update extited food info
         for (Food food : foodDAL.getAllFood()) {
             if (food.getId() == foodId) {
                 System.out.println("Updating existing food id:" + foodId);
@@ -184,7 +184,7 @@ public class FoodTabController {
                 food.setCategoryId(categoryChoiceBox.getValue().getId());
                 food.setPrice((long) priceSpinner.getValue());
                 food.setImageName(foodImgPathField.getText());
-
+                foodDAL.updateFood(food);
                 // Reload food items
                 loadFoodItems();
 
