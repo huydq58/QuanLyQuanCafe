@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="QuanLyQuanCafe.controller.AdminController"
+            prefHeight="400.0" prefWidth="600.0">
+    <children>
+        <TabPane layoutX="214.0" layoutY="146.0" prefHeight="200.0" prefWidth="200.0"
+                 tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="40.0"
+                 AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="50.0">
+            <tabs>
+                <Tab fx:id="billTab" text="Doanh Thu">
+                    <!-- <content>
+                        <fx:include source="BillTab.fxml" />
+                    </content> -->
+                </Tab>
+
+                <Tab fx:id="foodTab" text="Thức ăn">
+                    <!-- <content>
+                        <fx:include source="FoodTab.fxml" />
+                    </content> -->
+                </Tab>
+
+                <Tab fx:id="categoryTab" text="Doanh Mục">
+                    <!-- <content>
+                        <fx:include source="CategoryTab.fxml" />
+                    </content> -->
+                </Tab>
+
+                <Tab fx:id="tableTab" text="Bàn">
+                    <!-- <content>
+                        <fx:include source="TableTab.fxml" />
+                    </content> -->
+                </Tab>
+
+                <Tab fx:id="accountTab" text="Tài khoản">
+                    <!-- <content>
+                        <fx:include source="AccountTab.fxml" />
+                    </content> -->
+                </Tab>
+            </tabs>
+        </TabPane>
+        <HBox layoutY="14.0" style="-fx-background-color: #906d55;" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Button mnemonicParsing="false" onAction="#backtoMain" prefWidth="50.0"
+                        style="-fx-background-color: #e5b78d;" text="Back" />
+            </children>
+
+        </HBox>
+        <HBox AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Label fx:id="messageUpdateDB" alignment="CENTER_RIGHT" prefHeight="18.0"
+                       prefWidth="220.0" textAlignment="RIGHT" textFill="RED" />
+                <Button mnemonicParsing="false" onAction="#saveDB"
+                        style="-fx-background-color: #e5b78d;" text="Cập nhật cơ sở dữ liệu" />
+            </children>
+
+        </HBox>
+    </children>
+</AnchorPane>

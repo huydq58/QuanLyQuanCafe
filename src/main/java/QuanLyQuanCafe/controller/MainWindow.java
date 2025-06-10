@@ -59,7 +59,7 @@ public class MainWindow implements Initializable {
         categoryChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateFoodDisplay(newVal));
     }
 
-    @FXML private void gotoAdminScreen() throws IOException { App.setRoot("AdminScreen"); }
+    @FXML private void gotoAdminScreen() throws IOException { App.setRoot("Admin"); }
     @FXML private void gotoLoginScreen() throws IOException { App.setRoot("login"); }
 
     //Load Table lên Flowpane

@@ -147,7 +147,7 @@
         </HBox>
         <HBox layoutX="10.0" layoutY="10.0" style="-fx-background-color: #DEEAF1;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <Button fx:id="gotoAdminButton" disable="true" mnemonicParsing="false" style="-fx-background-color: #e5b78d;" text="Admin" textFill="#663307">
+                <Button fx:id="gotoAdminButton"  mnemonicParsing="false" style="-fx-background-color: #e5b78d;" text="Admin" onAction="#gotoAdminScreen" textFill="#663307">
                     <HBox.margin>
                         <Insets left="10.0" top="5.0" />
                     </HBox.margin></Button>
