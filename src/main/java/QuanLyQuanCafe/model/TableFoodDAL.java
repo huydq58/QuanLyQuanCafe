@@ -104,5 +104,26 @@ public class TableFoodDAL {
 
         return 0;
     }
+
+    public int getTableCount() {
+        String query = "SELECT COUNT(*) FROM TableFood";
+
+
+        try (Connection conn = dataProvider.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+
+            if (rs.next()) {
+
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+        return 0;
+    }
 }
 

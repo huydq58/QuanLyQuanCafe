@@ -130,5 +130,26 @@ public class FoodDAL {
             e.printStackTrace();
         }
         return null;
+
     }
+    public int getFoodCount() {
+        String query = "SELECT COUNT(*) FROM Food";
+
+
+        try (Connection conn = dataProvider.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+
+            if (rs.next()) {
+
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 }

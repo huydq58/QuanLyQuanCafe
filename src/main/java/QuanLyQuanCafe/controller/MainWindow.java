@@ -192,16 +192,16 @@ public class MainWindow implements Initializable {
     public void thanhToan() {
         BillDAL billDAL = new BillDAL(provider);
         TableFoodDAL tableDAL = new TableFoodDAL(provider);
-
         // 1. Cập nhật trạng thái bàn
         TableFood table = tableDAL.getTableById(choseTable);
+        Bill bill = billDAL.getBillById(chosenBill);
+        if (bill == null) {return;}
         if (table != null) {
             table.setAvailable(true);
             tableDAL.updateTable(table); // Cập nhật vào DB
         }
 
         // 2. Cập nhật hóa đơn
-        Bill bill = billDAL.getBillById(chosenBill);
         if (bill != null) {
             double totalPriceLocal = 0;
 

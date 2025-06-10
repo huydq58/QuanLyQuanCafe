@@ -34,7 +34,6 @@ public class TableFood {
         this.name = name;
     }
 
-
     public boolean isAvailable() { return status; }
     public void setAvailable(boolean available) { status = available; }
 

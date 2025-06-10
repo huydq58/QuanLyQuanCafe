@@ -40,7 +40,7 @@ public class App extends Application{
                 scene.getWindow().centerOnScreen();
                 break;
             case "Admin":
-                scene.getWindow().setWidth(1000);
+                scene.getWindow().setWidth(1050);
                 scene.getWindow().setHeight(650);
                 scene.getWindow().centerOnScreen();
                 break;

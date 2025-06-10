@@ -1,29 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<?import javafx.scene.text.Font?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="QuanLyQuanCafe.controller.CategoryTabController"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.CategoryTabController">
     <children>
-        <AnchorPane prefHeight="400.0" prefWidth="920.0" style="-fx-background-color: #e5b78d;"
-                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="91.0">
+        <AnchorPane prefHeight="400.0" prefWidth="920.0" style="-fx-background-color: #e5b78d;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="91.0">
             <children>
                 <TableView fx:id="categoryTableView" prefHeight="400.0" prefWidth="466.0">
                     <columns>
                         <TableColumn fx:id="categoryIdCol" prefWidth="47.19997787475586" text="ID" />
-                        <TableColumn fx:id="categoryNameCol2" prefWidth="198.40003967285156"
-                                     text="Tên" />
+                        <TableColumn fx:id="categoryNameCol2" prefWidth="198.40003967285156" text="Tên" />
                     </columns>
                 </TableView>
-                <VBox layoutX="582.0" layoutY="14.0" prefHeight="248.0" prefWidth="280.0">
+                <VBox layoutX="467.0" layoutY="9.0" prefHeight="260.0" prefWidth="356.0">
                     <children>
                         <HBox alignment="CENTER" prefHeight="44.0" prefWidth="280.0" spacing="100.0">
                             <children>
@@ -31,16 +22,13 @@
                                 <TextField fx:id="categoryIdField" editable="false" />
                             </children>
                         </HBox>
-                        <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="44.0"
-                              prefWidth="280.0" spacing="100.0">
+                        <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="44.0" prefWidth="280.0" spacing="100.0">
                             <children>
                                 <Label text="Tên" />
                                 <TextField fx:id="categoryNameField" promptText="Tên món" />
                             </children>
                         </HBox>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                onAction="#handleSaveCategory" style="-fx-background-color: #a97550;"
-                                text="Lưu" textFill="WHITE">
+                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSaveCategory" style="-fx-background-color: #a97550;" text="Lưu" textFill="WHITE">
                             <font>
                                 <Font name="Calibri Bold" size="16.0" />
                             </font>
@@ -51,15 +39,10 @@
         </AnchorPane>
         <HBox alignment="CENTER" prefHeight="90.0" prefWidth="466.0" spacing="20.0">
             <children>
-                <TextField fx:id="searchCategoryField" prefHeight="26.0" prefWidth="248.0"
-                           promptText="Tìm món ăn" />
-                <Button mnemonicParsing="false" onAction="#handleSearchCategory" prefHeight="30.0"
-                        prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Tìm" />
-                <Button mnemonicParsing="false" onAction="#handleAddCategory" prefHeight="30.0"
-                        prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Thêm" />
-                <Button layoutX="228.0" layoutY="34.0" mnemonicParsing="false"
-                        onAction="#handleDeleteCategory" prefHeight="30.0" prefWidth="86.0"
-                        style="-fx-background-color: #e5b78d;" text="Xóa" />
+                <TextField fx:id="searchCategoryField" prefHeight="26.0" prefWidth="248.0" promptText="Tìm món ăn" />
+                <Button mnemonicParsing="false" onAction="#handleSearchCategory" prefHeight="30.0" prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Tìm" />
+                <Button mnemonicParsing="false" onAction="#handleAddCategory" prefHeight="30.0" prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Thêm" />
+                <Button layoutX="228.0" layoutY="34.0" mnemonicParsing="false" onAction="#handleDeleteCategory" prefHeight="30.0" prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Xóa" />
             </children>
         </HBox>
     </children>

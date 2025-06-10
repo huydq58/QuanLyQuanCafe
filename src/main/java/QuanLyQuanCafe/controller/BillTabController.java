@@ -12,6 +12,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -68,17 +69,23 @@ public class BillTabController {
                 cellData -> new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
 
         orderDateCol.setCellValueFactory(cellData -> {
-            LocalDate orderDate = cellData.getValue().getOrderDate().toLocalDate();
-            return new SimpleStringProperty(orderDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            LocalDateTime orderDateTime = cellData.getValue().getOrderDate(); // Assuming getOrderDate() returns a LocalDateTime or compatible type
+            return new SimpleStringProperty(orderDateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss  yyyy-MM-dd")));
         });
 
         paidDateCol.setCellValueFactory(cellData -> {
-            LocalDate paidDate = cellData.getValue().getPaidDate() != null
-                    ? cellData.getValue().getPaidDate().toLocalDate()
-                    : null;
+
+            LocalDateTime paidDateTime = cellData.getValue().getPaidDate(); // Use getPaidDate() directly
+
             return new SimpleStringProperty(
-                    paidDate != null ? paidDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "");
+                    paidDateTime != null
+                            ? paidDateTime.format(DateTimeFormatter.ofPattern("HH:mm:ss  yyyy-MM-dd"))
+                            : ""
+            );
         });
+
+        ObservableList<Bill> billList = FXCollections.observableArrayList(new BillDAL(provider).getAllBills());
+        billTableView.setItems(billList);
 
     }
 

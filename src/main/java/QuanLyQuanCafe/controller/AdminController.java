@@ -29,7 +29,6 @@ public class AdminController {
     private FoodTabController foodController;
     private CategoryTabController categoryController;
     private TableTabController tableController;
-    private AccountTabController accountController;
 
     @FXML
     public Label messageUpdateDB;
@@ -96,17 +95,6 @@ public class AdminController {
             }
         });
 
-        accountTab.setOnSelectionChanged(event -> {
-            if (accountTab.isSelected() && accountController == null) {
-                try {
-                    FXMLLoader accountLoader = new FXMLLoader(App.class.getResource("AccountTab.fxml"));
-                    accountTab.setContent(accountLoader.load());
-                    accountController = accountLoader.getController();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     @FXML
@@ -170,9 +158,6 @@ public class AdminController {
         return tableController;
     }
 
-    public AccountTabController getAccountController() {
-        return accountController;
-    }
 
 
 

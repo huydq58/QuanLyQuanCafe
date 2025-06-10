@@ -1,25 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="QuanLyQuanCafe.controller.BillTabController"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.BillTabController">
     <children>
-        <Button layoutX="443.0" layoutY="27.0" mnemonicParsing="false" onAction="#handleViewButton"
-                prefHeight="40.0" prefWidth="81.0" style="-fx-background-color: #e5b78d;" text="Xem" />
+        <Button layoutX="443.0" layoutY="27.0" mnemonicParsing="false" onAction="#handleViewButton" prefHeight="40.0" prefWidth="81.0" style="-fx-background-color: #e5b78d;" text="Xem" />
         <VBox alignment="CENTER" layoutX="89.0" layoutY="14.0" prefHeight="80.0" prefWidth="331.0">
             <children>
                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
                     <children>
                         <Label text="Ngày Bắt Đầu" />
-                        <DatePicker fx:id="orderDatePicker" promptText="2024-10-22"
-                                    showWeekNumbers="true" />
+                        <DatePicker fx:id="orderDatePicker" promptText="2024-10-22" showWeekNumbers="true" />
                     </children>
                 </HBox>
                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20.0">
@@ -32,16 +24,13 @@
         </VBox>
         <AnchorPane layoutX="10.0" layoutY="101.0" prefHeight="400.0" prefWidth="920.0">
             <children>
-                <TableView fx:id="billTableView">
+                <TableView fx:id="billTableView" prefHeight="400.0" prefWidth="909.0">
                     <columns>
-                        <TableColumn fx:id="tableNameCol" prefWidth="75.0" text="Tên bàn" />
-                        <TableColumn fx:id="totalPriceCol" prefWidth="75.0" text="Tổng Tiền" />
-                        <TableColumn fx:id="orderDateCol" prefWidth="94.40003967285156"
-                                     text="Thời gian vào" />
-                        <TableColumn fx:id="paidDateCol" prefWidth="93.59999084472656"
-                                     text="Thời gian ra" />
-                        <TableColumn fx:id="discountCol" prefWidth="93.59999084472656"
-                                     text="Giảm Giá" />
+                        <TableColumn fx:id="tableNameCol" prefWidth="120.0" text="Tên bàn" />
+                        <TableColumn fx:id="totalPriceCol" prefWidth="180.0" text="Tổng Tiền" />
+                        <TableColumn fx:id="orderDateCol" prefWidth="240.0" text="Thời gian vào" />
+                        <TableColumn fx:id="paidDateCol" prefWidth="240.0" text="Thời gian ra" />
+                        <TableColumn fx:id="discountCol" prefWidth="113.0" text="Giảm Giá" />
                     </columns>
                 </TableView>
             </children>

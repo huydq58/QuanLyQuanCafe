@@ -151,8 +151,9 @@ public class FoodTabController {
     @FXML
     private void handleAddFood() {
         clearInputFields();
+        FoodDAL foodDAL = new FoodDAL(provider);
+        int id = foodDAL.getFoodCount()+1;
         setDisableLabelInputButtons(false);
-
     }
 
     @FXML
