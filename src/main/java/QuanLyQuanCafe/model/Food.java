@@ -87,11 +87,11 @@ public class Food {
         this.isAvailable = available;
     }
 
-    public String getImagePath() {
+    public String getImgName() {
         return imagePath;
     }
 
-    public void setImagePath(String imagePath) {
+    public void setImageName(String imagePath) {
         this.imagePath = imagePath;
     }
 
@@ -105,7 +105,7 @@ public class Food {
                 ", unit='" + unit + '\'' +
                 ", description='" + description + '\'' +
                 ", isAvailable=" + isAvailable +
-                ", imagePath='" + imagePath + '\'' +
+                ", imageName='" + imagePath + '\'' +
                 '}';
     }
 }

@@ -51,7 +51,7 @@ public class MainWindow implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         thanhToanButton.setDisable(true);
         totalPrice.setText("");
-        loadTables(); loadFoods(); loadCategories();
+        loadTables(); loadAllFoods(); loadCategories();
         setupOrderTable();
         setupDeleteColumn();
         addFoodButton.setOnAction(event -> addFood());
@@ -72,7 +72,7 @@ public class MainWindow implements Initializable {
         }
     }
     //Load món ăn lên Flowpane
-    private void loadFoods() {
+    private void loadAllFoods() {
         for (Food food : new FoodDAL(provider).getAllFood()) loadFoodItem(food);
     }
     //Load danh mục vào choicebox
@@ -80,13 +80,24 @@ public class MainWindow implements Initializable {
         List<Category> categories = new CategoryDAL(provider).getAllCategories();
         categoryChoiceBox.setItems(FXCollections.observableArrayList(categories));
     }
-    //Cập nhật Flowpane món ăn khi chọn danh mục
     private void updateFoodDisplay(Category selectedCategory) {
         danhSachMon.getChildren().clear();
+
         List<Food> foods = new FoodDAL(provider).getAllFood();
-        if (selectedCategory != null) foods = foods.stream().filter(f -> f.getCategoryId() == selectedCategory.getId()).collect(Collectors.toList());
-        foods.forEach(this::loadFoodItem);
+
+        // Lọc theo category nếu được chọn
+        if (selectedCategory != null) {
+            foods = foods.stream()
+                    .filter(f -> f.getCategoryId() == selectedCategory.getId())
+                    .collect(Collectors.toList());
+        }
+
+        // Load các món ăn hợp lệ vào giao diện
+        for (Food food : foods) {
+            loadFoodItem(food); // Gọi phiên bản nhận Food làm tham số
+        }
     }
+
     //Xử lý khi chọn vào món ăn
     private void chonFood(javafx.event.ActionEvent event, ImageView imageView) {
         imageViews.forEach(img -> img.setOpacity(1));
@@ -267,21 +278,47 @@ public class MainWindow implements Initializable {
     }
 
     private void loadFoodItem(Food food) {
-        VBox vBox = new VBox(5);
-        vBox.setPrefSize(100, 130);
+        VBox vBox = new VBox();
+
+        vBox.setPrefWidth(100);
+        vBox.setPrefHeight(100);
         vBox.setAlignment(Pos.CENTER);
 
-        ImageView imageView = new ImageView(new Image(new File(food.getImagePath()).toURI().toString()));
-        imageView.setFitWidth(100); imageView.setFitHeight(100);
+        StackPane stackPane = new StackPane();
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(100);
+        imageView.setFitHeight(100);
+
         imageViews.add(imageView);
 
-        ToggleButton btn = createToggleButton("", food.getId(), foodBtbGroup);
-        btn.setOpacity(0); btn.setOnAction(e -> chonFood(e, imageView));
 
-        StackPane stack = new StackPane(imageView, btn);
-        vBox.getChildren().addAll(stack, new Label(food.getName()));
+        File imageFile = new File("images/" + food.getImgName());
+
+        Image image = new Image(imageFile.toURI().toString());
+
+        imageView.setImage(image);
+
+        ToggleButton b = new ToggleButton();
+        b.setToggleGroup(foodBtbGroup);
+        b.setPrefHeight(100);
+        b.setPrefWidth(100);
+        b.setOpacity(0);
+        b.setUserData(food.getId());
+        b.setOnAction(event -> chonFood(event, imageView));
+
+        stackPane.getChildren().add(imageView);
+        stackPane.getChildren().add(b);
+
+        vBox.getChildren().add(stackPane);
+
+        Label label = new Label(food.getName());
+        label.setWrapText(true);
+        vBox.getChildren().add(label);
 
         danhSachMon.getChildren().add(vBox);
+
+
     }
 
     private ToggleButton createToggleButton(String text, int id, ToggleGroup group) {

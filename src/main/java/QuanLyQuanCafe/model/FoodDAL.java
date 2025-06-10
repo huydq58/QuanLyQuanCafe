@@ -30,7 +30,7 @@ public class FoodDAL {
                 food.setPrice(rs.getLong("price"));
                 food.setUnit(rs.getString("unit"));
                 food.setDescription(rs.getString("description"));
-                food.setImagePath(rs.getString("imagePath"));
+                food.setImageName(rs.getString("imagePath"));
                 food.setAvailable(rs.getBoolean("isAvailable"));
                 list.add(food);
             }
@@ -52,7 +52,7 @@ public class FoodDAL {
             stmt.setString(4, food.getUnit());
             stmt.setString(5, food.getDescription());
             stmt.setBoolean(6, food.isAvailable());
-            stmt.setString(7, food.getImagePath());
+            stmt.setString(7, food.getImgName());
 
             int affectedRows = stmt.executeUpdate();
 
@@ -81,7 +81,7 @@ public class FoodDAL {
             stmt.setString(4, food.getUnit());
             stmt.setString(5, food.getDescription());
             stmt.setBoolean(6, food.isAvailable());
-            stmt.setString(7, food.getImagePath());
+            stmt.setString(7, food.getImgName());
             stmt.setInt(8, food.getId());
 
             return stmt.executeUpdate();
@@ -122,7 +122,7 @@ public class FoodDAL {
                 food.setPrice(rs.getLong("price"));
                 food.setUnit(rs.getString("unit"));
                 food.setDescription(rs.getString("description"));
-                food.setImagePath(rs.getString("imagePath"));
+                food.setImageName(rs.getString("imagePath"));
                 food.setAvailable(rs.getBoolean("isAvailable"));
                 return food;
             }

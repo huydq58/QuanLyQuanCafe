@@ -61,6 +61,8 @@ public class FoodTabController {
     @FXML
     private Button saveButton;
 
+    private DataProvider provider;
+
     public void refreshData() {
         loadFoodItems();
     }
@@ -68,6 +70,7 @@ public class FoodTabController {
     @FXML
     public void initialize() {
         System.out.println("Initialize food tab controller");
+        provider = new DataProvider();
         // Thức ăn code
         foodIdCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
         foodNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
@@ -109,134 +112,121 @@ public class FoodTabController {
     }
 
     private void loadFoodItems() {
-//        ObservableList<Food> foodList = FXCollections.observableArrayList(ShopDB.foods);
-//
-//        foodTableView.setItems(foodList);
-//
-//        // Refresh the table view
-//        foodTableView.refresh();
+        ObservableList<Food> foodList = FXCollections.observableArrayList(new FoodDAL(provider).getAllFood());
+
+        foodTableView.setItems(foodList);
+
+        // Refresh the table view
+        foodTableView.refresh();
     }
 
     public void loadCategories() {
-        // ObservableList<Category> categoryList =
-        // FXCollections.observableArrayList(ShopDB.categories);
-
-        // cateTabController.categoryTableView.setItems(categoryList);
-
-        // // Refresh the table view
-        // cateTabController.categoryTableView.refresh();
-//
-//        categoryChoiceBox.getItems().clear();
-//        categoryChoiceBox.getItems().addAll(ShopDB.categories);
+        categoryChoiceBox.getItems().clear();
+        categoryChoiceBox.getItems().addAll(new CategoryDAL(provider).getAllCategories());
     }
 
     private void populateFoodFields(Food food) {
-//        foodIdField.setText(String.valueOf(food.getId()));
-//        foodNameField.setText(food.getName());
-//        categoryChoiceBox.setValue(food.getCategory());
-//        priceSpinner.getValueFactory().setValue((int) (long) food.getPrice());
-//
-//        for (Food f : ShopDB.foods) {
-//            if (f.getId() == food.getId()) {
-//
-//                if (f.getImgName() == null) {
-//                    foodImg.setImage(null);
-//                    foodImgPathField.setText("No image");
-//                } else {
-//                    foodImgPathField.setText(f.getImgName());
-//                    loadImageFromAppImages(f.getImgName());
-//                }
-//
-//                break;
-//            }
-//        }
+        foodIdField.setText(String.valueOf(food.getId()));
+        foodNameField.setText(food.getName());
+        CategoryDAL categoryDAL = new CategoryDAL(provider);
+        categoryChoiceBox.setValue(categoryDAL.getCategoryById(food.getCategoryId()));
+        priceSpinner.getValueFactory().setValue((int) (long) food.getPrice());
+
+        for (Food f : new FoodDAL(provider).getAllFood()) {
+            if (f.getId() == food.getId()) {
+
+                if (f.getImgName() == null) {
+                    foodImg.setImage(null);
+                    foodImgPathField.setText("No image");
+                } else {
+                    foodImgPathField.setText(f.getImgName());
+                    loadImageFromAppImages(f.getImgName());
+                }
+
+                break;
+            }
+        }
     }
 
     @FXML
     private void handleAddFood() {
-//        clearInputFields();
-//        setDisableLabelInputButtons(false);
-//        foodIdField.setText(String.valueOf(ShopDB.foods.size() + 1)); // Auto-increment ID for new food
+        clearInputFields();
+        setDisableLabelInputButtons(false);
+
     }
 
     @FXML
     private void handleSaveFood() {
+        FoodDAL foodDAL = new FoodDAL(provider);
 
-//        if (foodNameField.getText().isEmpty()) {
-//            System.out.println("Please enter food name.");
-//            return;
-//        }
-//
-//        if (categoryChoiceBox.getValue() == null) {
-//            System.out.println("Please select a category.");
-//            return;
-//        }
-//
-//        if (priceSpinner.getValue() == 0 || priceSpinner.getValue() == null) {
-//            System.out.println("Please enter a price.");
-//            return;
-//        }
-//
-//        if (foodIdField.getText().isEmpty()) {
-//            System.out.println("Please enter a food ID.");
-//            return;
-//        }
-//
-//        int foodId = Integer.parseInt(foodIdField.getText());
-//
-//        // Save new food info
-//        for (Food food : ShopDB.foods) {
-//            if (food.getId() == foodId) {
-//                System.out.println("Updating existing food id:" + foodId);
-//                food.setName(foodNameField.getText());
-//                food.setCategoryId(categoryChoiceBox.getValue().getId());
-//                food.setPrice((long) priceSpinner.getValue());
-//                food.setImgName(foodImgPathField.getText());
-//
-//                // Reload food items
-//                loadFoodItems();
-//
-//                return;
-//            }
-//        }
-//
-//        // Add new food
-//        System.out.println("Food with ID " + foodId + " does not exist. Creating new food...");
-//        Food f = new Food();
-//        f.setId(foodId);
-//        f.setName(foodNameField.getText());
-//        f.setCategoryId(categoryChoiceBox.getValue().getId());
-//        f.setPrice((long) priceSpinner.getValue());
-//        f.setImgName(foodImgPathField.getText());
-//        ShopDB.foods.add(f);
-//
-//        clearInputFields();
-//        // Reload food items
-//        loadFoodItems();
+
+        if (foodNameField.getText().isEmpty()) {
+            System.out.println("Please enter food name.");
+            return;
+        }
+
+        if (categoryChoiceBox.getValue() == null) {
+            System.out.println("Please select a category.");
+            return;
+        }
+
+        if (priceSpinner.getValue() == 0 || priceSpinner.getValue() == null) {
+            System.out.println("Please enter a price.");
+            return;
+        }
+        int foodId = Integer.parseInt(foodIdField.getText());
+
+        // Save new food info
+        for (Food food : foodDAL.getAllFood()) {
+            if (food.getId() == foodId) {
+                System.out.println("Updating existing food id:" + foodId);
+                food.setName(foodNameField.getText());
+                food.setCategoryId(categoryChoiceBox.getValue().getId());
+                food.setPrice((long) priceSpinner.getValue());
+                food.setImageName(foodImgPathField.getText());
+
+                // Reload food items
+                loadFoodItems();
+
+                return;
+            }
+        }
+        // Add new food
+        Food f = new Food();
+        f.setName(foodNameField.getText());
+        f.setCategoryId(categoryChoiceBox.getValue().getId());
+        f.setPrice((long) priceSpinner.getValue());
+        f.setImageName(foodImgPathField.getText());
+        foodDAL.addFood(f);
+
+        clearInputFields();
+        // Reload food items
+        loadFoodItems();
     }
 
     @FXML
     private void handleDeleteFood() {
-//        Food selectedFood = foodTableView.getSelectionModel().getSelectedItem();
-//        if (selectedFood != null) {
-//            ShopDB.foods.remove(selectedFood);
-//            loadFoodItems();
-//            clearInputFields();
-//        }
+        Food selectedFood = foodTableView.getSelectionModel().getSelectedItem();
+        if (selectedFood != null) {
+            FoodDAL foodDAL = new FoodDAL(provider);
+            foodDAL.deleteFood(selectedFood.getId());
+            loadFoodItems();
+            clearInputFields();
+        }
     }
 
     @FXML
     private void handleSearchFood() {
-//        String query = searchField.getText().toLowerCase();
-//        ObservableList<Food> filteredList = FXCollections.observableArrayList();
-//
-//        for (Food food : ShopDB.foods) {
-//            if (food.getName().toLowerCase().contains(query)) {
-//                filteredList.add(food);
-//            }
-//        }
-//
-//        foodTableView.setItems(filteredList);
+        String query = searchField.getText().toLowerCase();
+        ObservableList<Food> filteredList = FXCollections.observableArrayList();
+
+        for (Food food : new FoodDAL(provider).getAllFood()) {
+            if (food.getName().toLowerCase().contains(query)) {
+                filteredList.add(food);
+            }
+        }
+
+        foodTableView.setItems(filteredList);
     }
 
     private void loadImageFromAppImages(String imgName) {

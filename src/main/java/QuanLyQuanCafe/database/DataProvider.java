@@ -7,11 +7,9 @@ public class DataProvider {
 
     // Constructor có thể nhận trực tiếp connection string hoặc dùng từ config class
     public DataProvider() {
-        // Cách 1: dùng lớp DatabaseConfig (nếu bạn có)
         this.connectionString = DatabaseConfig.getConnectionString();
 
-        // Cách 2: hoặc hard-code tạm thời (nếu chưa có DatabaseConfig):
-        // this.connectionString = "jdbc:sqlserver://localhost:1433;databaseName=MiniSupermarket;user=sa;password=your_password";
+
 
         if (this.connectionString == null || this.connectionString.isEmpty()) {
             throw new IllegalStateException("Chuỗi kết nối chưa được cấu hình.");
