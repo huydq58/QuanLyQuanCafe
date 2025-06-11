@@ -309,3 +309,17 @@
 .danger-button:hover {
     -fx-background-color: derive(#D32F2F, -10%);
 }
+
+/* * ===================================================================
+ * KIỂU DÁNG CHO TAB CẢNH BÁO
+ * ===================================================================
+ */
+
+.tab.tab-warning {
+    -fx-background-color: #D32F2F; /* Màu đỏ cảnh báo */
+}
+
+/* Đảm bảo chữ vẫn là màu trắng khi tab cảnh báo được chọn */
+.tab.tab-warning:selected .tab-label {
+    -fx-text-fill: white;
+}

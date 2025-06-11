@@ -1,5 +1,12 @@
 package QuanLyQuanCafe.controller;
 
+import java.io.IOException;
+import java.util.List;
+
+import QuanLyQuanCafe.App;
+import QuanLyQuanCafe.database.DataProvider;
+import QuanLyQuanCafe.model.NguyenLieu;
+import QuanLyQuanCafe.model.NguyenLieuDAL;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,11 +14,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.util.Duration;
-
-import java.io.IOException;
-import  QuanLyQuanCafe.*;
-import  QuanLyQuanCafe.model.*;
-import  QuanLyQuanCafe.database.*;
 
 public class AdminController {
     @FXML
@@ -24,11 +26,14 @@ public class AdminController {
     private Tab tableTab;
     @FXML
     private Tab accountTab;
+    @FXML 
+    private Tab inventoryTab;
 
     private BillTabController billController;
     private FoodTabController foodController;
     private CategoryTabController categoryController;
     private TableTabController tableController;
+    private InventoryTabController inventoryController;
 
     @FXML
     public Label messageUpdateDB;
@@ -44,6 +49,9 @@ public class AdminController {
         }
 
         setupTabHandlers();
+        
+        // KIỂM TRA TỒN KHO KHI KHỞI TẠO
+        checkInventoryWarnings();
     }
 
     private void setupTabHandlers() {
@@ -58,13 +66,29 @@ public class AdminController {
             }
         });
 
+        inventoryTab.setOnSelectionChanged(event -> {
+            if (inventoryTab.isSelected()) {
+                if (inventoryController == null) {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(App.class.getResource("InventoryTab.fxml"));
+                        inventoryTab.setContent(loader.load());
+                        inventoryController = loader.getController();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // Xóa cảnh báo khi người dùng đã xem
+                inventoryTab.getStyleClass().remove("tab-warning");
+                inventoryTab.setText("Quản lý Kho");
+            }
+        });
+
         foodTab.setOnSelectionChanged(event -> {
             if (foodTab.isSelected() && foodController == null) {
                 try {
                     FXMLLoader foodLoader = new FXMLLoader(App.class.getResource("FoodTab.fxml"));
                     foodTab.setContent(foodLoader.load());
                     foodController = foodLoader.getController();
-                    foodController.refreshData();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -94,7 +118,27 @@ public class AdminController {
                 }
             }
         });
+        
+        // Vô hiệu hóa tab chưa có chức năng
+        accountTab.setDisable(true);
+        accountTab.setContent(new Label("Chức năng 'Quản lý Tài khoản' đang được phát triển."));
+    }
+    
+    /**
+     * Phương thức kiểm tra các nguyên liệu dưới ngưỡng và cập nhật giao diện tab
+     */
+    private void checkInventoryWarnings() {
+        DataProvider provider = new DataProvider();
+        NguyenLieuDAL nguyenLieuDAL = new NguyenLieuDAL(provider);
+        List<NguyenLieu> lowStockItems = nguyenLieuDAL.getNguyenLieuDuoiNguong();
 
+        if (lowStockItems != null && !lowStockItems.isEmpty()) {
+            inventoryTab.getStyleClass().add("tab-warning");
+            inventoryTab.setText("Quản lý Kho (" + lowStockItems.size() + ")");
+        } else {
+            inventoryTab.getStyleClass().remove("tab-warning");
+            inventoryTab.setText("Quản lý Kho");
+        }
     }
 
     @FXML
@@ -109,25 +153,13 @@ public class AdminController {
 
     @FXML
     private void saveDB() {
-        try {
-
-
-            // Update UI to show success
-            showSuccess("Database saved successfully");
-
-            // Refresh all views to show updated data
-            // refreshAllData();
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Error saving database", e.getMessage());
-        }
+        // Chưa có logic
     }
 
     private void showSuccess(String message) {
         messageUpdateDB.setText(message);
         messageUpdateDB.setStyle("-fx-text-fill: green;");
 
-        // Clear message after delay
         PauseTransition pause = new PauseTransition(Duration.seconds(3));
         pause.setOnFinished(e -> messageUpdateDB.setText(""));
         pause.play();
@@ -140,33 +172,4 @@ public class AdminController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-    // Getters for sub-controllers
-    public BillTabController getbillController() {
-        return billController;
-    }
-
-    public FoodTabController getFoodController() {
-        return foodController;
-    }
-
-    public CategoryTabController getCategoryController() {
-        return categoryController;
-    }
-
-    public TableTabController getTableController() {
-        return tableController;
-    }
-
-
-
-
-    public void exportData() {
-        // Implement data export functionality
-    }
-
-    public void importData() {
-        // Implement data import functionality
-    }
 }
-

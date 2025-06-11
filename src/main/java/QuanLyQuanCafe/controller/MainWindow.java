@@ -28,8 +28,11 @@ import QuanLyQuanCafe.model.BillDAL;
 import QuanLyQuanCafe.model.Category;
 import QuanLyQuanCafe.model.CategoryDAL;
 import QuanLyQuanCafe.model.CurrentUserSession;
+import QuanLyQuanCafe.model.DinhLuongMonAn;
+import QuanLyQuanCafe.model.DinhLuongMonAnDAL;
 import QuanLyQuanCafe.model.Food;
 import QuanLyQuanCafe.model.FoodDAL;
+import QuanLyQuanCafe.model.NguyenLieuDAL;
 import QuanLyQuanCafe.model.Order;
 import QuanLyQuanCafe.model.OrderDAL;
 import QuanLyQuanCafe.model.OrderItemView;
@@ -345,6 +348,9 @@ public class MainWindow {
             bill.setTotalPrice(finalPrice);
             bill.setDisCount(discount);
             billDAL.updateBill(bill);
+            
+            // KÍCH HOẠT LẠI TÍNH NĂNG TRỪ KHO
+            truKhoNguyenLieu(orderItems);
         }
         
         TableFood table = tableDAL.getTableById(choseTable);
@@ -354,9 +360,30 @@ public class MainWindow {
             loadTables();
         }
 
+        // Reset UI
         discountField.setText("0");
         updateOrderTable(choseTable);
         messageTableLabel.setText("Vui lòng chọn bàn");
+    }
+
+    private void truKhoNguyenLieu(List<OrderItemView> orderItems) {
+        DinhLuongMonAnDAL dinhLuongDAL = new DinhLuongMonAnDAL(provider);
+        NguyenLieuDAL nguyenLieuDAL = new NguyenLieuDAL(provider);
+
+        for (OrderItemView item : orderItems) {
+            int idMonAn = item.getFoodID();
+            long soLuongMon = item.getQuantity();
+
+            List<DinhLuongMonAn> congThuc = dinhLuongDAL.getDinhLuongByMonAnId(idMonAn);
+
+            if (!congThuc.isEmpty()) {
+                for (DinhLuongMonAn nguyenLieuCan : congThuc) {
+                    double luongGiam = nguyenLieuCan.getSoLuongCan() * soLuongMon;
+                    nguyenLieuDAL.capNhatSoLuongTon(nguyenLieuCan.getIdNguyenLieu(), luongGiam);
+                }
+            }
+        }
+        System.out.println("Đã cập nhật kho sau khi thanh toán.");
     }
 
     private void setupDeleteColumn() {
@@ -403,9 +430,8 @@ public class MainWindow {
     }
 
     private String convertToVND(double money) {
-        // SỬA LỖI Ở ĐÂY: Thay thế ký hiệu tiền tệ không được hỗ trợ
         String formatted = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")).format(money);
-        return formatted.replace("₫", "d"); // Thay ký hiệu '₫' bằng chữ 'd'
+        return formatted.replace("₫", "d");
     }
 
     private void showAlert(String title, String message) {
@@ -466,7 +492,7 @@ public class MainWindow {
                         String line = String.format("%-25.25s %5d %15s",
                                 removeDiacritics(item.getFoodName()),
                                 item.getQuantity(),
-                                convertToVND(item.getTotalPrice())); // convertToVND đã được sửa
+                                convertToVND(item.getTotalPrice()));
                         contentStream.showText(line);
                         contentStream.newLine();
                     }
@@ -504,15 +530,11 @@ public class MainWindow {
         }
     }
     
-    /**
-     * Hàm tiện ích để loại bỏ dấu khỏi chuỗi tiếng Việt, bao gồm cả chữ 'Đ'.
-     */
     private String removeDiacritics(String str) {
         if (str == null) return null;
         String nfdNormalizedString = Normalizer.normalize(str, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         String temp = pattern.matcher(nfdNormalizedString).replaceAll("");
-        // Xử lý riêng cho chữ Đ và đ
         return temp.replace('đ', 'd').replace('Đ', 'D');
     }
 }

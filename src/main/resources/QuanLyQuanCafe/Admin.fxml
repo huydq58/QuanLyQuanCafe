@@ -33,6 +33,7 @@
                 <Tab fx:id="categoryTab" text="Danh mục" />
                 <Tab fx:id="tableTab" text="Bàn" />
                 <Tab fx:id="accountTab" text="Tài khoản" />
+                <Tab fx:id="inventoryTab" text="Quản lý Kho" /> <Tab fx:id="accountTab" text="Tài khoản" />
             </tabs>
         </TabPane>
     </center>

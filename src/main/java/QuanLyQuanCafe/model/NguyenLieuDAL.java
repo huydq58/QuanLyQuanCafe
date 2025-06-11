@@ -15,11 +15,24 @@ public class NguyenLieuDAL {
     public NguyenLieuDAL(DataProvider provider) {
         this.dataProvider = provider;
     }
-
-    /**
-     * Lấy danh sách nguyên liệu sắp hết (số lượng tồn <= ngưỡng cảnh báo).
-     * Phục vụ Use Case: [UC007] Xem Cảnh Báo Nguyên Liệu Sắp Hết.
-     */
+    
+    // Lấy tất cả nguyên liệu
+    public List<NguyenLieu> getAllNguyenLieu() {
+        List<NguyenLieu> danhSach = new ArrayList<>();
+        String sql = "SELECT * FROM NguyenLieu";
+        try (Connection conn = dataProvider.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                danhSach.add(mapResultSetToNguyenLieu(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return danhSach;
+    }
+    
+    // PHƯƠNG THỨC BỊ THIẾU GÂY LỖI
     public List<NguyenLieu> getNguyenLieuDuoiNguong() {
         List<NguyenLieu> danhSach = new ArrayList<>();
         String sql = "SELECT * FROM NguyenLieu WHERE soLuongTon <= nguongCanhBao AND nguongCanhBao > 0";
@@ -35,19 +48,30 @@ public class NguyenLieuDAL {
         return danhSach;
     }
 
-    /**
-     * Cập nhật (trừ) số lượng tồn kho của một nguyên liệu.
-     * Phục vụ Use Case: [UC011] Xác Nhận Thanh Toán Đơn Hàng (tự động trừ kho).
-     * @param idNguyenLieu ID của nguyên liệu cần cập nhật.
-     * @param luongGiam Số lượng cần trừ đi.
-     * @return true nếu cập nhật thành công, false nếu thất bại.
-     */
+    // Thêm nguyên liệu mới
+    public int addNguyenLieu(NguyenLieu nl) {
+        String sql = "INSERT INTO NguyenLieu (ten, donViTinh, soLuongTon, nguongCanhBao) VALUES (?, ?, ?, ?)";
+        return dataProvider.executeUpdate(sql, nl.getTen(), nl.getDonViTinh(), nl.getSoLuongTon(), nl.getNguongCanhBao());
+    }
+
+    // Cập nhật nguyên liệu
+    public int updateNguyenLieu(NguyenLieu nl) {
+        String sql = "UPDATE NguyenLieu SET ten = ?, donViTinh = ?, soLuongTon = ?, nguongCanhBao = ? WHERE id = ?";
+        return dataProvider.executeUpdate(sql, nl.getTen(), nl.getDonViTinh(), nl.getSoLuongTon(), nl.getNguongCanhBao(), nl.getId());
+    }
+
+    // Xóa nguyên liệu
+    public int deleteNguyenLieu(int id) {
+        String sql = "DELETE FROM NguyenLieu WHERE id = ?";
+        return dataProvider.executeUpdate(sql, id);
+    }
+    
+    // Cập nhật (trừ) số lượng tồn kho khi thanh toán
     public boolean capNhatSoLuongTon(int idNguyenLieu, double luongGiam) {
         String sql = "UPDATE NguyenLieu SET soLuongTon = soLuongTon - ? WHERE id = ?";
         return dataProvider.executeUpdate(sql, luongGiam, idNguyenLieu) > 0;
     }
 
-    // Hàm tiện ích để chuyển đổi dữ liệu từ ResultSet sang đối tượng NguyenLieu
     private NguyenLieu mapResultSetToNguyenLieu(ResultSet rs) throws SQLException {
         NguyenLieu nl = new NguyenLieu();
         nl.setId(rs.getInt("id"));
@@ -56,21 +80,5 @@ public class NguyenLieuDAL {
         nl.setSoLuongTon(rs.getDouble("soLuongTon"));
         nl.setNguongCanhBao(rs.getDouble("nguongCanhBao"));
         return nl;
-    }
-    
-    // Các hàm CRUD cơ bản sẽ cần cho Tab Quản lý kho sau này
-    public List<NguyenLieu> getAllNguyenLieu() {
-         List<NguyenLieu> danhSach = new ArrayList<>();
-        String sql = "SELECT * FROM NguyenLieu";
-        try (Connection conn = dataProvider.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                danhSach.add(mapResultSetToNguyenLieu(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return danhSach;
     }
 }
