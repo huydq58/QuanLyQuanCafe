@@ -266,3 +266,46 @@
 .food-card.selected .label {
     -fx-text-fill: white;
 }
+
+/* * ===================================================================
+ * KIỂU DÁNG RIÊNG CHO KHUNG MÀN HÌNH ADMIN
+ * ===================================================================
+ */
+
+.header-panel {
+    -fx-background-color: #483434; /* Màu chữ chính, tạo sự tương phản */
+}
+
+.header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* * ===================================================================
+ * KIỂU DÁNG RIÊNG CHO CÁC FORM TRONG ADMIN
+ * ===================================================================
+ */
+
+.form-panel {
+    -fx-background-color: #FFF8EA; /* Màu trắng ngà */
+    -fx-padding: 20px;
+    -fx-background-radius: 8px;
+}
+
+.form-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -primary-color;
+    -fx-padding: 0 0 10px 0;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-color: -primary-color;
+}
+
+/* Nút bấm nguy hiểm (như nút xóa) */
+.danger-button {
+    -fx-background-color: #D32F2F; /* Màu đỏ */
+}
+.danger-button:hover {
+    -fx-background-color: derive(#D32F2F, -10%);
+}
