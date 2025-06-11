@@ -3,7 +3,8 @@ package QuanLyQuanCafe.model;
 public class TaiKhoan {
     private String tenDangNhap;
     private String matKhauHash;
-    private Integer maNV; // Integer thay cho int? (nullable)
+    private Integer maNV;
+    private String role; // <-- THÊM DÒNG NÀY
 
     // Constructor (nếu cần)
     public TaiKhoan() {}
@@ -31,5 +32,14 @@ public class TaiKhoan {
 
     public void setMaNV(Integer maNV) {
         this.maNV = maNV;
+    }
+    
+    // <-- THÊM CÁC HÀM NÀY
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

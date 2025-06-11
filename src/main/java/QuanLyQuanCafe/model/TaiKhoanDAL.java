@@ -1,10 +1,14 @@
 package QuanLyQuanCafe.model;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import QuanLyQuanCafe.model.*;
-import QuanLyQuanCafe.database.*;
+
+import QuanLyQuanCafe.database.DataProvider;
 
 public class TaiKhoanDAL {
     private final DataProvider dataProvider;
@@ -38,35 +42,19 @@ public class TaiKhoanDAL {
         return list;
     }
 
-//    public boolean getIsAdminByMaNV(int maNV) {
-//        String query = "SELECT IsAdmin FROM NhanVien WHERE MaNV = ?";
-//        try (Connection conn = dataProvider.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(query)) {
-//
-//            stmt.setInt(1, maNV);
-//            ResultSet rs = stmt.executeQuery();
-//
-//            if (rs.next()) {
-//                return rs.getBoolean("IsAdmin");
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
-
     public TaiKhoan getTaiKhoanByUsername(String username) {
-        String query = "SELECT TenDangNhap, MatKhauHash, MaNV FROM TaiKhoan WHERE TenDangNhap = ?";
+        // Thêm "Role" vào câu lệnh SELECT
+        String query = "SELECT TenDangNhap, MatKhauHash, MaNV, Role FROM TaiKhoan WHERE TenDangNhap = ?";
         try (Connection conn = dataProvider.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
+        PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-
             if (rs.next()) {
                 TaiKhoan tk = new TaiKhoan();
                 tk.setTenDangNhap(rs.getString("TenDangNhap"));
-                tk.setMatKhauHash(rs.getString("MatKhauHash"));
+                tk.setMatKhauHash(rs.getString("MatKhauHash").trim());
+                tk.setRole(rs.getString("Role")); // <-- THÊM DÒNG NÀY
                 int maNV = rs.getInt("MaNV");
                 tk.setMaNV(rs.wasNull() ? null : maNV);
                 return tk;
@@ -74,7 +62,6 @@ public class TaiKhoanDAL {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 

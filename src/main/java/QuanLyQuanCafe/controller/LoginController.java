@@ -1,15 +1,17 @@
 package QuanLyQuanCafe.controller;
 
-import  QuanLyQuanCafe.*;
-import  QuanLyQuanCafe.model.*;
-import  QuanLyQuanCafe.database.*;
+import  org.mindrot.jbcrypt.BCrypt;
 
+import  QuanLyQuanCafe.App;
+import  QuanLyQuanCafe.database.DataProvider;
+import QuanLyQuanCafe.model.CurrentUserSession;
+import QuanLyQuanCafe.model.TaiKhoan;
+import QuanLyQuanCafe.model.TaiKhoanDAL;
 import javafx.fxml.FXML;
-import java.io.IOException;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import QuanLyQuanCafe.crypto.Hashing;
-import org.mindrot.jbcrypt.BCrypt;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 
 public class LoginController {
 
@@ -23,12 +25,6 @@ public class LoginController {
     private Label messageLabel;
 
     @FXML
-    private void gotoView() throws IOException {
-
-        App.setRoot("mainScreen");
-    }
-
-    @FXML
     private void handleLogin() {
         String username = usernameField.getText();
         String password = passwordField.getText();
@@ -39,11 +35,9 @@ public class LoginController {
         }
 
         try {
-            // Tạo DataProvider và DAL
             DataProvider dp = new DataProvider();
             TaiKhoanDAL taiKhoanDAL = new TaiKhoanDAL(dp);
 
-            // 1. Lấy tài khoản từ cơ sở dữ liệu
             TaiKhoan tk = taiKhoanDAL.getTaiKhoanByUsername(username);
 
             if (tk == null) {
@@ -51,25 +45,20 @@ public class LoginController {
                 return;
             }
 
-            // 2. So sánh mật khẩu nhập với hash từ DB
             boolean verified = BCrypt.checkpw(password, tk.getMatKhauHash());
 
             if (!verified) {
                 showAlert("Đăng nhập thất bại", "Mật khẩu không chính xác.");
                 return;
             }
+            
+            // === THAY ĐỔI QUAN TRỌNG: LƯU PHIÊN ĐĂNG NHẬP ===
+            CurrentUserSession.getInstance().login(tk);
+            System.out.println("User " + tk.getTenDangNhap() + " with role " + tk.getRole() + " logged in.");
+            // ===============================================
 
-//            // 3. Kiểm tra quyền nếu cần (ví dụ: admin)
-//            boolean isAdmin = false;
-//            if (tk.getMaNV() != null) {
-//                isAdmin = taiKhoanDAL.getIsAdminByMaNV(tk.getMaNV());
-//            }
-
-            // Đăng nhập thành công
             showAlert("Thành công", "Đăng nhập thành công!");
-
-            // 👉 TODO: chuyển sang giao diện chính
-             App.setRoot("MainWindow");
+            App.setRoot("MainWindow");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,8 +73,4 @@ public class LoginController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
-
-
 }

@@ -1,15 +1,52 @@
 package QuanLyQuanCafe.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import QuanLyQuanCafe.App;
 import QuanLyQuanCafe.database.DataProvider;
-import QuanLyQuanCafe.model.*;
-
+import QuanLyQuanCafe.model.Bill;
+import QuanLyQuanCafe.model.BillDAL;
+import QuanLyQuanCafe.model.Category;
+import QuanLyQuanCafe.model.CategoryDAL;
+import QuanLyQuanCafe.model.CurrentUserSession;
+import QuanLyQuanCafe.model.DinhLuongMonAn;
+import QuanLyQuanCafe.model.DinhLuongMonAnDAL;
+import QuanLyQuanCafe.model.Food;
+import QuanLyQuanCafe.model.FoodDAL;
+import QuanLyQuanCafe.model.NguyenLieuDAL;
+import QuanLyQuanCafe.model.Order;
+import QuanLyQuanCafe.model.OrderDAL;
+import QuanLyQuanCafe.model.OrderItemView;
+import QuanLyQuanCafe.model.TableFood;
+import QuanLyQuanCafe.model.TableFoodDAL;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
@@ -18,15 +55,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.LongStringConverter;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.sql.SQLException;
-import java.text.NumberFormat;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class MainWindow implements Initializable {
 
@@ -57,6 +85,7 @@ public class MainWindow implements Initializable {
         addFoodButton.setOnAction(event -> addFood());
         quantitySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
         categoryChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateFoodDisplay(newVal));
+        gotoAdminButton.setVisible(CurrentUserSession.getInstance().isQuanLy());
     }
 
     @FXML private void gotoAdminScreen() throws IOException { App.setRoot("Admin"); }
@@ -218,6 +247,9 @@ public class MainWindow implements Initializable {
             bill.setTotalPrice(totalPriceLocal);
 
             billDAL.updateBill(bill); // Cập nhật vào DB
+
+            // === TỰ ĐỘNG TRỪ KHO NGUYÊN LIỆU ===
+            truKhoNguyenLieu(orderItems); 
         }
 
         // 3. Reset giao diện
@@ -226,6 +258,41 @@ public class MainWindow implements Initializable {
         bangHoaDon.getItems().clear();
         thanhToanButton.setDisable(true);
     }
+
+    /**
+     * Tự động trừ kho nguyên liệu dựa trên các món trong hóa đơn đã thanh toán.
+     * Phục vụ Use Case [UC011].
+     * @param orderItems Danh sách các món hàng đã được bán.
+     */
+    private void truKhoNguyenLieu(List<OrderItemView> orderItems) {
+        DinhLuongMonAnDAL dinhLuongDAL = new DinhLuongMonAnDAL(provider);
+        NguyenLieuDAL nguyenLieuDAL = new NguyenLieuDAL(provider);
+
+        // Lặp qua từng món ăn trong hóa đơn
+        for (OrderItemView item : orderItems) {
+            int idMonAn = item.getFoodID();
+            long soLuongMon = item.getQuantity();
+
+            // Với mỗi món, lấy công thức (danh sách nguyên liệu và định lượng) của nó
+            List<DinhLuongMonAn> congThuc = dinhLuongDAL.getDinhLuongByMonAnId(idMonAn);
+
+            // Nếu món ăn có công thức, lặp qua từng nguyên liệu trong công thức
+            if (!congThuc.isEmpty()) {
+                for (DinhLuongMonAn nguyenLieuCan : congThuc) {
+                    // Tính toán tổng số lượng nguyên liệu cần trừ
+                    double luongGiam = nguyenLieuCan.getSoLuongCan() * soLuongMon;
+                    
+                    // Gọi DAL để cập nhật (trừ) số lượng trong CSDL
+                    nguyenLieuDAL.capNhatSoLuongTon(nguyenLieuCan.getIdNguyenLieu(), luongGiam);
+
+                    // In ra console để kiểm tra (bạn có thể xóa sau này)
+                    System.out.println("Tru kho: Mon ID " + idMonAn + ", Nguyen Lieu ID " + nguyenLieuCan.getIdNguyenLieu() + ", So luong giam: " + luongGiam);
+                }
+            }
+        }
+        System.out.println("Hoan tat cap nhat kho cho hoa don.");
+    }
+
 
     private void setupDeleteColumn() {
         deleteCol.setCellFactory(col -> new TableCell<>() {
