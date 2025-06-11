@@ -5,91 +5,38 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.paint.Color?>
-<?import javafx.scene.paint.LinearGradient?>
-<?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.LoginController">
-    <children>
-        <ImageView fitHeight="400.0" fitWidth="600.0" layoutY="-180.0" pickOnBounds="true">
-            <image>
-                <Image url="@../images/login.jpg" />
-            </image>
-        </ImageView>
-        <Pane layoutY="130.0" prefHeight="270.0" prefWidth="600.0" style="-fx-background-color: #fff;">
-            <children>
-                <Label alignment="CENTER" contentDisplay="CENTER" layoutX="134.0" layoutY="10.0" text="Quản Lý Cà Phê" textAlignment="CENTER">
-                    <font>
-                        <Font name="Cambria Math" size="50.0" />
-                    </font>
-                    <opaqueInsets>
-                        <Insets />
-                    </opaqueInsets>
-                    <textFill>
-                        <LinearGradient endX="1.0" endY="1.0" startX="1.0">
-                            <stops>
-                                <Stop>
-                                    <color>
-                                        <Color red="0.741" green="0.941" blue="0.980" /> <!-- Xanh nhạt -->
-                                    </color>
-                                </Stop>
-                                <Stop offset="1.0">
-                                    <color>
-                                        <Color red="0.502" green="0.776" blue="0.898" /> <!-- Xanh nhạt đậm hơn -->
-                                    </color>
-                                </Stop>
-                            </stops>
-                        </LinearGradient>
-                    </textFill>
-                    <textFill>
-                        <LinearGradient endX="1.0" endY="1.0" startX="1.0">
-                            <stops>
-                                <Stop>
-                                    <color>
-                                        <Color red="1.0" green="0.7882353067398071" blue="0.6431372761726379" />
-                                    </color>
-                                </Stop>
-                                <Stop offset="1.0">
-                                    <color>
-                                        <Color red="0.6431372761726379" green="0.45098039507865906" blue="0.1882352977991104" />
-                                    </color>
-                                </Stop>
-                            </stops>
-                        </LinearGradient>
-                    </textFill>
-                </Label>
-                <VBox alignment="CENTER" layoutY="103.0" prefWidth="600.0" spacing="10.0">
-                    <children>
-                        <HBox alignment="CENTER" prefHeight="6.0" prefWidth="200.0" spacing="10.0">
-                            <children>
-                                <Label text="Tài khoản" />
-                                <TextField fx:id="usernameField" />
-                            </children>
-                        </HBox>
-                        <HBox alignment="CENTER" prefHeight="18.0" prefWidth="200.0" spacing="10.0">
-                            <children>
-                                <Label text="Mật khẩu" />
-                                <PasswordField fx:id="passwordField" />
-                            </children>
-                        </HBox>
-                        <Button mnemonicParsing="false" onAction="#handleLogin" prefHeight="26.0" prefWidth="206.0"
-                                style="-fx-background-color: #ADD8E6;" text="Đăng nhập" textAlignment="CENTER" textFill="WHITE">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
-                        </Button>
-
-                        <Label fx:id="messageLabel" />
-                    </children>
-                </VBox>
-            </children>
-        </Pane>
-    </children>
-</AnchorPane>
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.LoginController">
+   <children>
+      <VBox alignment="CENTER" maxWidth="350.0" spacing="15.0" styleClass="login-panel">
+         <children>
+            <Label styleClass="login-title" text="ĐĂNG NHẬP">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+            <Label text="Chào mừng trở lại hệ thống quản lý" />
+            <VBox spacing="5.0">
+               <children>
+                  <Label text="Tên đăng nhập" />
+                  <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập..." />
+               </children>
+            </VBox>
+            <VBox spacing="5.0">
+               <children>
+                  <Label text="Mật khẩu" />
+                  <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu..." />
+               </children>
+            </VBox>
+            <Label fx:id="messageLabel" styleClass="error-label" />
+            <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="login-button" text="Đăng nhập" />
+         </children>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+   </children>
+</StackPane>

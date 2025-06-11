@@ -4,6 +4,7 @@ module org.example.quanlyquancafe {
     requires com.google.gson;
     requires java.sql;
     requires jbcrypt;
+    requires org.apache.pdfbox;
 
     opens QuanLyQuanCafe.model to javafx.base, javafx.fxml;  // mở package model cho javafx.base (và fxml nếu cần)
 

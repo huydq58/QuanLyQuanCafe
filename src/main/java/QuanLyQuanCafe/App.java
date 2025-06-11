@@ -1,12 +1,12 @@
 package QuanLyQuanCafe;
 
+import java.io.IOException;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.stage.Stage;
 import javafx.scene.Scene;
-
-import java.io.IOException;
+import javafx.stage.Stage;
 
 public class App extends Application{
 
@@ -15,6 +15,9 @@ public class App extends Application{
     @Override
     public void start(Stage stage) throws Exception {
         scene = new Scene(loadFXML("login"));
+        
+        scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+        
         stage.setScene(scene);
         stage.setTitle("Coffee Management");
         stage.show();
@@ -24,33 +27,34 @@ public class App extends Application{
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
+    
     public static void setRoot(String fxml) throws IOException {
         Parent root = loadFXML(fxml);
         scene.setRoot(root);
 
+        // Cập nhật kích thước cửa sổ theo từng màn hình
         switch (fxml) {
             case "login":
-                scene.getWindow().setWidth(600);
-                scene.getWindow().setHeight(400);
+                // Kích thước cho màn hình đăng nhập
+                scene.getWindow().setWidth(800);
+                scene.getWindow().setHeight(500);
                 scene.getWindow().centerOnScreen();
                 break;
+
             case "MainWindow":
-                scene.getWindow().setWidth(1050);
-                scene.getWindow().setHeight(650);
-                scene.getWindow().centerOnScreen();
-                break;
             case "Admin":
-                scene.getWindow().setWidth(1050);
-                scene.getWindow().setHeight(650);
+                // Kích thước chuẩn cho các màn hình chính (tương đương tablet)
+                scene.getWindow().setWidth(1100);
+                scene.getWindow().setHeight(700);
                 scene.getWindow().centerOnScreen();
                 break;
+                
             default:
-                scene.getWindow().setWidth(600);
-                scene.getWindow().setHeight(400);
+                // Kích thước mặc định cho các trường hợp khác
+                scene.getWindow().setWidth(800);
+                scene.getWindow().setHeight(600);
                 scene.getWindow().centerOnScreen();
                 break;
         }
-
     }
-
 }
