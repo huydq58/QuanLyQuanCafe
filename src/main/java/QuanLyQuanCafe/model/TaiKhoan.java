@@ -7,7 +7,12 @@ public class TaiKhoan {
     private String role; // <-- THÊM DÒNG NÀY
 
     // Constructor (nếu cần)
-    public TaiKhoan() {}
+    public TaiKhoan() {
+        tenDangNhap = "";
+        matKhauHash = "";
+        maNV = 0;
+        role = "NHANVIEN";
+    }
 
     // Getter & Setter
     public String getTenDangNhap() {

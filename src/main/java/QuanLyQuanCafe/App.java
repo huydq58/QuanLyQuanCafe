@@ -2,6 +2,7 @@ package QuanLyQuanCafe;
 
 import java.io.IOException;
 
+import QuanLyQuanCafe.model.TaiKhoan;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

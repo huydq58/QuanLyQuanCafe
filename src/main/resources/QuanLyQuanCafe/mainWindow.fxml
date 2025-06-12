@@ -70,7 +70,7 @@
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
                   <Label text="Thêm món:" />
-                  <Spinner fx:id="quantitySpinner" prefWidth="80.0" />
+                  <Spinner fx:id="quantitySpinner" prefWidth="120.0" editable="true"/>
                   <Button fx:id="addFoodButton" mnemonicParsing="false" text="Thêm" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
