@@ -32,6 +32,7 @@ import QuanLyQuanCafe.model.DinhLuongMonAn;
 import QuanLyQuanCafe.model.DinhLuongMonAnDAL;
 import QuanLyQuanCafe.model.Food;
 import QuanLyQuanCafe.model.FoodDAL;
+import QuanLyQuanCafe.model.NguyenLieu; // <-- THÊM IMPORT NÀY
 import QuanLyQuanCafe.model.NguyenLieuDAL;
 import QuanLyQuanCafe.model.Order;
 import QuanLyQuanCafe.model.OrderDAL;
@@ -87,6 +88,18 @@ public class MainWindow {
     private List<OrderItemView> orderItems = new ArrayList<>();
     private static final DataProvider provider = new DataProvider();
 
+    // --- BẮT ĐẦU THÊM MỚI ---
+    private final NguyenLieuDAL nguyenLieuDAL;
+    private final DinhLuongMonAnDAL dinhLuongDAL;
+    // --- KẾT THÚC THÊM MỚI ---
+
+    // --- BẮT ĐẦU SỬA ĐỔI CONSTRUCTOR ---
+    public MainWindow() {
+        this.nguyenLieuDAL = new NguyenLieuDAL(provider);
+        this.dinhLuongDAL = new DinhLuongMonAnDAL(provider);
+    }
+    // --- KẾT THÚC SỬA ĐỔI CONSTRUCTOR ---
+    
     @FXML
     public void initialize() {
         thanhToanButton.setDisable(true);
@@ -101,6 +114,87 @@ public class MainWindow {
         categoryChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateFoodDisplay(newVal));
         gotoAdminButton.setVisible(CurrentUserSession.getInstance().isQuanLy());
     }
+    
+    // --- BẮT ĐẦU THÊM MỚI: PHƯƠNG THỨC KIỂM TRA NGUYÊN LIỆU ---
+    /**
+     * Kiểm tra xem các nguyên liệu có đủ cho một món ăn với số lượng cho trước không.
+     * @param foodId ID của món ăn cần kiểm tra.
+     * @param quantityToAdd Số lượng món ăn sẽ được thêm.
+     * @return null nếu đủ nguyên liệu, ngược lại trả về chuỗi thông báo lỗi.
+     */
+    private String kiemTraNguyenLieu(int foodId, int quantityToAdd) {
+        List<DinhLuongMonAn> congThuc = dinhLuongDAL.getDinhLuongByMonAnId(foodId);
+    
+        // Nếu món không có công thức, coi như luôn đủ
+        if (congThuc == null || congThuc.isEmpty()) {
+            return null;
+        }
+    
+        for (DinhLuongMonAn dinhLuong : congThuc) {
+            NguyenLieu nguyenLieuTrongKho = nguyenLieuDAL.getNguyenLieuById(dinhLuong.getIdNguyenLieu());
+    
+            if (nguyenLieuTrongKho == null) {
+                return "Lỗi dữ liệu: Không tìm thấy nguyên liệu ID " + dinhLuong.getIdNguyenLieu() + " trong kho.";
+            }
+    
+            double luongCan = dinhLuong.getSoLuongCan() * quantityToAdd;
+    
+            if (nguyenLieuTrongKho.getSoLuongTon() < luongCan) {
+                return String.format("Không đủ '%s'.\nCần %.2f %s, chỉ còn %.2f %s.",
+                        nguyenLieuTrongKho.getTen(),
+                        luongCan, nguyenLieuTrongKho.getDonViTinh(),
+                        nguyenLieuTrongKho.getSoLuongTon(), nguyenLieuTrongKho.getDonViTinh());
+            }
+        }
+    
+        // Nếu vòng lặp kết thúc mà không có lỗi, tức là đủ nguyên liệu
+        return null;
+    }
+    // --- KẾT THÚC THÊM MỚI ---
+
+    @FXML
+    public void addFood() {
+        if (choseTable == 0) { showAlert("Thiếu thông tin", "Vui lòng chọn bàn trước!"); return; }
+        if (choseFood == 0) { showAlert("Thiếu thông tin", "Vui lòng chọn món ăn!"); return; }
+        int quantity = quantitySpinner.getValue();
+
+        // --- BẮT ĐẦU THÊM MỚI: LOGIC KIỂM TRA KHO ---
+        String errorMessage = kiemTraNguyenLieu(choseFood, quantity);
+        if (errorMessage != null) {
+            showAlert("Không đủ nguyên liệu", errorMessage);
+            return; // Dừng lại, không thêm món ăn
+        }
+        // --- KẾT THÚC THÊM MỚI ---
+
+        BillDAL billDAL = new BillDAL(provider);
+        OrderDAL orderDAL = new OrderDAL(provider);
+
+        try {
+            if ((chosenBill = getBillIdByTableId(choseTable)) == 0) {
+                Bill newBill = new Bill(choseTable, 0, 0, false);
+                chosenBill = billDAL.insertBill(newBill);
+                TableFood table = new TableFoodDAL(provider).getTableById(choseTable);
+                if (table != null) {
+                    table.setAvailable(false);
+                    new TableFoodDAL(provider).updateTable(table);
+                    loadTables();
+                }
+                messageTableLabel.setText("Bàn " + choseTable + " có khách!");
+            }
+            if (orderDAL.existsOrder(chosenBill, choseFood)) {
+                orderDAL.increaseQuantity(chosenBill, choseFood, quantity);
+            } else {
+                orderDAL.insertOrder(new Order(chosenBill, choseFood, quantity));
+            }
+            updateOrderTable(choseTable);
+        } catch (SQLException e) {
+            showAlert("Lỗi CSDL", e.getMessage());
+        }
+    }
+    
+    // ... (Các phương thức khác giữ nguyên không thay đổi)
+    // ... (gotoAdminScreen, signOut, loadTables, loadAllFoods, loadCategories, v.v...)
+    // ... (Bạn chỉ cần sao chép và thay thế toàn bộ file là được)
 
     @FXML
     private void gotoAdminScreen() throws IOException {
@@ -324,38 +418,6 @@ private void updateFoodDisplay(Category selectedCategory) {
             new OrderDAL(provider).updateOrder(new Order(chosenBill, item.getFoodID(), newQty));
             updateOrderTable(choseTable);
         });
-    }
-
-    @FXML
-    public void addFood() {
-        if (choseTable == 0) { showAlert("Thiếu thông tin", "Vui lòng chọn bàn trước!"); return; }
-        if (choseFood == 0) { showAlert("Thiếu thông tin", "Vui lòng chọn món ăn!"); return; }
-        int quantity = quantitySpinner.getValue();
-
-        BillDAL billDAL = new BillDAL(provider);
-        OrderDAL orderDAL = new OrderDAL(provider);
-
-        try {
-            if ((chosenBill = getBillIdByTableId(choseTable)) == 0) {
-                Bill newBill = new Bill(choseTable, 0, 0, false);
-                chosenBill = billDAL.insertBill(newBill);
-                TableFood table = new TableFoodDAL(provider).getTableById(choseTable);
-                if (table != null) {
-                    table.setAvailable(false);
-                    new TableFoodDAL(provider).updateTable(table);
-                    loadTables();
-                }
-                messageTableLabel.setText("Bàn " + choseTable + " có khách!");
-            }
-            if (orderDAL.existsOrder(chosenBill, choseFood)) {
-                orderDAL.increaseQuantity(chosenBill, choseFood, quantity);
-            } else {
-                orderDAL.insertOrder(new Order(chosenBill, choseFood, quantity));
-            }
-            updateOrderTable(choseTable);
-        } catch (SQLException e) {
-            showAlert("Lỗi CSDL", e.getMessage());
-        }
     }
 
     @FXML

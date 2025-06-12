@@ -47,6 +47,23 @@ public class NguyenLieuDAL {
         }
         return danhSach;
     }
+    // Lấy nguyên liệu theo ID
+
+    public NguyenLieu getNguyenLieuById(int id) {
+        String sql = "SELECT * FROM NguyenLieu WHERE id = ?";
+        try (Connection conn = dataProvider.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToNguyenLieu(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     // Thêm nguyên liệu mới
     public int addNguyenLieu(NguyenLieu nl) {
