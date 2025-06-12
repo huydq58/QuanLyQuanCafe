@@ -1,299 +1,266 @@
 package QuanLyQuanCafe.controller;
 
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleLongProperty;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import QuanLyQuanCafe.App;
+import QuanLyQuanCafe.database.DataProvider;
+import QuanLyQuanCafe.model.Category;
+import QuanLyQuanCafe.model.CategoryDAL;
+import QuanLyQuanCafe.model.DinhLuongMonAn;
+import QuanLyQuanCafe.model.DinhLuongMonAnDAL;
+import QuanLyQuanCafe.model.Food;
+import QuanLyQuanCafe.model.FoodDAL;
+import QuanLyQuanCafe.model.NguyenLieu;
+import QuanLyQuanCafe.model.NguyenLieuDAL;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-
-import  QuanLyQuanCafe.*;
-import  QuanLyQuanCafe.model.*;
-import  QuanLyQuanCafe.database.*;
-
 
 public class FoodTabController {
-    @FXML
-    private TableView<Food> foodTableView;
 
-    @FXML
-    private TableColumn<Food, Integer> foodIdCol;
+    @FXML private TableView<Food> foodTableView;
+    @FXML private TableColumn<Food, Integer> foodIdCol;
+    @FXML private TableColumn<Food, String> foodNameCol;
+    @FXML private TableColumn<Food, String> categoryNameCol;
+    @FXML private TableColumn<Food, Long> priceCol;
+    @FXML private TextField searchField;
 
-    @FXML
-    private TableColumn<Food, String> foodNameCol;
-
-    @FXML
-    private TableColumn<Food, String> categoryNameCol;
-
-    @FXML
-    private TableColumn<Food, Long> priceCol;
-
-    @FXML
-    private TextField foodIdField;
-
-    @FXML
-    private TextField foodNameField;
-
-    @FXML
-    private ChoiceBox<Category> categoryChoiceBox;
-
-    @FXML
-    private Spinner<Integer> priceSpinner;
-
-    @FXML
-    private TextField searchField;
-
-    @FXML
-    private TextField foodImgPathField;
-
-    @FXML
-    private ImageView foodImg;
-
-    @FXML
-    private Button saveButton;
+    @FXML private TextField foodIdField;
+    @FXML private TextField foodNameField;
+    @FXML private ChoiceBox<Category> categoryChoiceBox;
+    @FXML private Spinner<Double> priceSpinner;
+    @FXML private TextField foodImgPathField;
+    @FXML private ImageView foodImg;
+    @FXML private Button saveButton;
+    
+    @FXML private TableView<DinhLuongMonAn> recipeTableView;
+    @FXML private TableColumn<DinhLuongMonAn, String> recipeIngredientNameCol;
+    @FXML private TableColumn<DinhLuongMonAn, Double> recipeQuantityCol;
+    @FXML private TableColumn<DinhLuongMonAn, Void> recipeDeleteCol;
+    @FXML private ChoiceBox<NguyenLieu> addIngredientChoiceBox;
+    @FXML private TextField addIngredientQuantityField;
 
     private DataProvider provider;
+    private FoodDAL foodDAL;
+    private CategoryDAL categoryDAL;
+    private DinhLuongMonAnDAL dinhLuongDAL;
+    private NguyenLieuDAL nguyenLieuDAL;
 
-    public void refreshData() {
-        loadFoodItems();
-    }
+    private Map<Integer, String> categoryMap = new HashMap<>();
+    private Map<Integer, String> ingredientMap = new HashMap<>();
+    private ObservableList<DinhLuongMonAn> currentRecipeList = FXCollections.observableArrayList();
+    private Food selectedFood;
 
     @FXML
     public void initialize() {
-        System.out.println("Initialize food tab controller");
         provider = new DataProvider();
-        // Thức ăn code
-        foodIdCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-        foodNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        categoryNameCol
-                .setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCategoryName()));
-        priceCol.setCellValueFactory(cellData -> new SimpleLongProperty(cellData.getValue().getPrice()).asObject());
+        foodDAL = new FoodDAL(provider);
+        categoryDAL = new CategoryDAL(provider);
+        dinhLuongDAL = new DinhLuongMonAnDAL(provider);
+        nguyenLieuDAL = new NguyenLieuDAL(provider);
 
-        // Initialize the price spinner
-        priceSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000000)); // Adjust max
-        // value
-        // as needed
-
-        // Load categories into the choice box
+        setupFoodTable();
+        setupRecipeTable();
+        
         loadCategories();
-
-        // Load food items into the table
+        loadIngredients();
         loadFoodItems();
+        
+        foodTableView.getSelectionModel().selectedItemProperty().addListener(
+            (obs, oldFood, newFood) -> populateForm(newFood)
+        );
+        
+        setupDoubleSpinner(priceSpinner, 0.0, 10000000.0, 0.0, 1000.0);
+        
+        priceSpinner.getEditor().setPromptText("Giá bán");
+        
+    
+    }
 
-        setDisableLabelInputButtons(true);
+    private void setupFoodTable() {
+        foodIdCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        foodNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+        categoryNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(categoryMap.get(cellData.getValue().getCategoryId())));
+    }
 
-        // Set table selection listener
-        foodTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                setDisableLabelInputButtons(false);
-                populateFoodFields(newSelection);
+    private void setupRecipeTable() {
+        recipeIngredientNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(ingredientMap.get(cellData.getValue().getIdNguyenLieu())));
+        recipeQuantityCol.setCellValueFactory(new PropertyValueFactory<>("soLuongCan"));
+        
+        recipeDeleteCol.setCellFactory(param -> new TableCell<>() {
+            private final Button deleteButton = new Button("Xóa");
+            {
+                deleteButton.setStyle("-fx-background-color: #FF6666; -fx-text-fill: white; -fx-font-size: 10;");
+                deleteButton.setOnAction(event -> {
+                    DinhLuongMonAn item = getTableView().getItems().get(getIndex());
+                    currentRecipeList.remove(item);
+                });
             }
-        });
-
-        foodImg.setOnMouseClicked(event -> {
-            File selectedFile = chooseFoodImg();
-
-            if (selectedFile == null)
-                return;
-
-            saveImageToFolder(selectedFile);
-
-            loadImageFromAppImages(selectedFile.getName());
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : deleteButton);
+            }
         });
     }
 
     private void loadFoodItems() {
-        ObservableList<Food> foodList = FXCollections.observableArrayList(new FoodDAL(provider).getAllFood());
-
+        ObservableList<Food> foodList = FXCollections.observableArrayList(foodDAL.getAllFood());
         foodTableView.setItems(foodList);
-
-        // Refresh the table view
-        foodTableView.refresh();
     }
 
-    public void loadCategories() {
-        categoryChoiceBox.getItems().clear();
-        categoryChoiceBox.getItems().addAll(new CategoryDAL(provider).getAllCategories());
+    private void loadCategories() {
+        List<Category> categories = categoryDAL.getAllCategories();
+        categoryMap = categories.stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        categoryChoiceBox.setItems(FXCollections.observableArrayList(categories));
     }
 
-    private void populateFoodFields(Food food) {
+    private void loadIngredients() {
+        List<NguyenLieu> ingredients = nguyenLieuDAL.getAllNguyenLieu();
+        ingredientMap = ingredients.stream().collect(Collectors.toMap(NguyenLieu::getId, NguyenLieu::getTen));
+        addIngredientChoiceBox.setItems(FXCollections.observableArrayList(ingredients));
+    }
+
+    private void populateForm(Food food) {
+        selectedFood = food;
+        if (food == null) {
+            clearForm();
+            return;
+        }
+
         foodIdField.setText(String.valueOf(food.getId()));
         foodNameField.setText(food.getName());
-        CategoryDAL categoryDAL = new CategoryDAL(provider);
-        categoryChoiceBox.setValue(categoryDAL.getCategoryById(food.getCategoryId()));
-        priceSpinner.getValueFactory().setValue((int) (long) food.getPrice());
-
-        for (Food f : new FoodDAL(provider).getAllFood()) {
-            if (f.getId() == food.getId()) {
-
-                if (f.getImgName() == null) {
-                    foodImg.setImage(null);
-                    foodImgPathField.setText("No image");
-                } else {
-                    foodImgPathField.setText(f.getImgName());
-                    loadImageFromAppImages(f.getImgName());
-                }
-
+        priceSpinner.getValueFactory().setValue((double) food.getPrice());
+        
+        for (Category c : categoryChoiceBox.getItems()) {
+            if (c.getId() == food.getCategoryId()) {
+                categoryChoiceBox.getSelectionModel().select(c);
                 break;
             }
         }
+        
+        foodImgPathField.setText(food.getImgName());
+        if (food.getImgName() != null && !food.getImgName().isEmpty()) {
+            InputStream is = App.class.getResourceAsStream("/images/" + food.getImgName());
+            if (is != null) {
+                foodImg.setImage(new Image(is));
+            } else {
+                foodImg.setImage(null);
+            }
+        } else {
+            foodImg.setImage(null);
+        }
+
+        currentRecipeList.setAll(dinhLuongDAL.getDinhLuongByMonAnId(food.getId()));
+        recipeTableView.setItems(currentRecipeList);
     }
 
     @FXML
-    private void handleAddFood() {
-        clearInputFields();
-        FoodDAL foodDAL = new FoodDAL(provider);
-        int id = foodDAL.getFoodCount()+1;
-        setDisableLabelInputButtons(false);
+    private void handleAddNewFood() {
+        foodTableView.getSelectionModel().clearSelection();
+        clearForm();
+        foodIdField.setText("0");
+    }
+    
+    @FXML
+    private void handleDeleteFood() {
+        if (selectedFood != null) {
+            foodDAL.deleteFood(selectedFood.getId());
+            loadFoodItems();
+            clearForm();
+        }
     }
 
     @FXML
     private void handleSaveFood() {
-        FoodDAL foodDAL = new FoodDAL(provider);
+        int foodId;
+        try {
+            foodId = Integer.parseInt(foodIdField.getText());
+        } catch (NumberFormatException e) {
+            foodId = 0;
+        }
+        
+        Food foodToSave = (foodId == 0) ? new Food() : selectedFood;
+        if (foodToSave == null) return;
+        
+        foodToSave.setName(foodNameField.getText());
+        foodToSave.setPrice(priceSpinner.getValue().longValue());
+        foodToSave.setCategoryId(categoryChoiceBox.getValue().getId());
+        foodToSave.setImageName(foodImgPathField.getText());
+        foodToSave.setAvailable(true);
 
+        if (foodId == 0) {
+            int newId = foodDAL.addFood(foodToSave);
+            foodToSave.setId(newId);
+        } else {
+            foodDAL.updateFood(foodToSave);
+        }
+        
+        dinhLuongDAL.overwriteDinhLuongForMonAn(foodToSave.getId(), currentRecipeList);
+        
+        loadFoodItems();
+        foodTableView.getSelectionModel().select(foodToSave);
+    }
+    
+    @FXML
+    private void handleAddIngredientToRecipe() {
+        NguyenLieu selected = addIngredientChoiceBox.getValue();
+        if (selected == null) return;
 
-        if (foodNameField.getText().isEmpty()) {
-            System.out.println("Please enter food name.");
+        double quantity;
+        try {
+            quantity = Double.parseDouble(addIngredientQuantityField.getText());
+            if (quantity <= 0) return;
+        } catch (NumberFormatException e) {
             return;
         }
 
-        if (categoryChoiceBox.getValue() == null) {
-            System.out.println("Please select a category.");
-            return;
-        }
-
-        if (priceSpinner.getValue() == 0 || priceSpinner.getValue() == null) {
-            System.out.println("Please enter a price.");
-            return;
-        }
-        int foodId = Integer.parseInt(foodIdField.getText());
-
-        // Update extited food info
-        for (Food food : foodDAL.getAllFood()) {
-            if (food.getId() == foodId) {
-                System.out.println("Updating existing food id:" + foodId);
-                food.setName(foodNameField.getText());
-                food.setCategoryId(categoryChoiceBox.getValue().getId());
-                food.setPrice((long) priceSpinner.getValue());
-                food.setImageName(foodImgPathField.getText());
-                foodDAL.updateFood(food);
-                // Reload food items
-                loadFoodItems();
-
+        for(DinhLuongMonAn item : currentRecipeList) {
+            if (item.getIdNguyenLieu() == selected.getId()) {
+                item.setSoLuongCan(quantity);
+                recipeTableView.refresh();
                 return;
             }
         }
-        // Add new food
-        Food f = new Food();
-        f.setName(foodNameField.getText());
-        f.setCategoryId(categoryChoiceBox.getValue().getId());
-        f.setPrice((long) priceSpinner.getValue());
-        f.setImageName(foodImgPathField.getText());
-        foodDAL.addFood(f);
-
-        clearInputFields();
-        // Reload food items
-        loadFoodItems();
+        
+        int foodId = (selectedFood != null) ? selectedFood.getId() : 0;
+        currentRecipeList.add(new DinhLuongMonAn(foodId, selected.getId(), quantity));
     }
 
-    @FXML
-    private void handleDeleteFood() {
-        Food selectedFood = foodTableView.getSelectionModel().getSelectedItem();
-        if (selectedFood != null) {
-            FoodDAL foodDAL = new FoodDAL(provider);
-            foodDAL.deleteFood(selectedFood.getId());
-            loadFoodItems();
-            clearInputFields();
-        }
-    }
-
-    @FXML
-    private void handleSearchFood() {
-        String query = searchField.getText().toLowerCase();
-        ObservableList<Food> filteredList = FXCollections.observableArrayList();
-
-        for (Food food : new FoodDAL(provider).getAllFood()) {
-            if (food.getName().toLowerCase().contains(query)) {
-                filteredList.add(food);
-            }
-        }
-
-        foodTableView.setItems(filteredList);
-    }
-
-    private void loadImageFromAppImages(String imgName) {
-        File imageFile = new File("images/" + imgName);
-        if (imageFile.exists()) {
-            Image image = new Image(imageFile.toURI().toString());
-            foodImg.setImage(image);
-        } else {
-            foodImg.setImage(null);
-            System.out.println("Image file not found at: " + imageFile.getPath());
-        }
-    }
-
-    private void saveImageToFolder(File sourceFile) {
-        if (sourceFile != null) {
-            // Define the destination folder within your project
-            File destinationFolder = new File("images");
-
-            // Create the directory if it doesn't exist
-            if (!destinationFolder.exists()) {
-                destinationFolder.mkdirs();
-            }
-
-            // Define the destination file path
-            File destinationFile = new File(destinationFolder, sourceFile.getName());
-
-            try {
-                // Copy the selected file to the images folder
-                Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Image saved to: " + destinationFile.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private File chooseFoodImg() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters()
-                .add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
-        File selectedFile = fileChooser.showOpenDialog(null);
-
-        if (selectedFile != null) {
-            foodImgPathField.setText(selectedFile.getName());
-        }
-        // else {
-        // selectedFile = new File("images", foodImgPathField.getText());
-        // }
-
-        return selectedFile;
-    }
-
-    private void clearInputFields() {
-        foodIdField.clear();
+    private void clearForm() {
+        selectedFood = null;
+        foodIdField.setText("");
         foodNameField.clear();
-        categoryChoiceBox.setValue(null);
-        priceSpinner.getValueFactory().setValue(0);
+        priceSpinner.getValueFactory().setValue(0.0);
+        categoryChoiceBox.getSelectionModel().clearSelection();
+        foodImgPathField.clear();
+        foodImg.setImage(null);
+        currentRecipeList.clear();
+        addIngredientChoiceBox.getSelectionModel().clearSelection();
+        addIngredientQuantityField.clear();
     }
-
-    private void setDisableLabelInputButtons(boolean b) {
-        foodIdField.setDisable(b);
-        foodNameField.setDisable(b);
-        categoryChoiceBox.setDisable(b);
-        priceSpinner.setDisable(b);
-        // foodImgPathField.setDisable(b);
-        foodImg.setDisable(b);
-        saveButton.setDisable(b);
+    
+    private void setupDoubleSpinner(Spinner<Double> spinner, double min, double max, double initialValue, double amountToStepBy) {
+        SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, initialValue, amountToStepBy);
+        spinner.setValueFactory(valueFactory);
     }
+    
+    @FXML private void handleSearchFood() { /* Tạm thời để trống */ }
 }

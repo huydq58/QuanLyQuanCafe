@@ -33,4 +33,10 @@ public class NguyenLieu {
 
     public double getNguongCanhBao() { return nguongCanhBao; }
     public void setNguongCanhBao(double nguongCanhBao) { this.nguongCanhBao = nguongCanhBao; }
+
+    @Override
+    public String toString() {
+        // Điều này giúp ChoiceBox hiển thị tên thay vì object reference
+        return this.ten; 
+    }
 }

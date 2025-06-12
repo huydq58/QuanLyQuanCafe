@@ -16,12 +16,6 @@ public class DinhLuongMonAnDAL {
         this.dataProvider = provider;
     }
 
-    /**
-     * Lấy danh sách nguyên liệu và định lượng (công thức) cho một món ăn cụ thể.
-     * Phục vụ Use Case: [UC011] Xác Nhận Thanh Toán Đơn Hàng (để biết cần trừ những gì).
-     * @param idMonAn ID của món ăn cần lấy công thức.
-     * @return Danh sách các định lượng cho món ăn đó.
-     */
     public List<DinhLuongMonAn> getDinhLuongByMonAnId(int idMonAn) {
         List<DinhLuongMonAn> danhSach = new ArrayList<>();
         String sql = "SELECT * FROM DinhLuongMonAn WHERE idMonAn = ?";
@@ -39,7 +33,47 @@ public class DinhLuongMonAnDAL {
         return danhSach;
     }
 
-    // Hàm tiện ích để chuyển đổi dữ liệu từ ResultSet sang đối tượng DinhLuongMonAn
+    /**
+     * Ghi đè toàn bộ công thức cho một món ăn.
+     * @param idMonAn ID của món ăn cần cập nhật công thức.
+     * @param newRecipe Danh sách các định lượng mới.
+     */
+    public void overwriteDinhLuongForMonAn(int idMonAn, List<DinhLuongMonAn> newRecipe) {
+        String deleteSql = "DELETE FROM DinhLuongMonAn WHERE idMonAn = ?";
+        String insertSql = "INSERT INTO DinhLuongMonAn (idMonAn, idNguyenLieu, soLuongCan) VALUES (?, ?, ?)";
+        
+        try (Connection conn = dataProvider.getConnection()) {
+            // Tắt auto-commit để thực hiện giao dịch
+            conn.setAutoCommit(false);
+            
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
+                // Xóa hết công thức cũ
+                deleteStmt.setInt(1, idMonAn);
+                deleteStmt.executeUpdate();
+                
+                // Thêm lại các định lượng mới
+                try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                    for (DinhLuongMonAn dl : newRecipe) {
+                        insertStmt.setInt(1, idMonAn);
+                        insertStmt.setInt(2, dl.getIdNguyenLieu());
+                        insertStmt.setDouble(3, dl.getSoLuongCan());
+                        insertStmt.addBatch();
+                    }
+                    insertStmt.executeBatch();
+                }
+                
+                // Commit giao dịch nếu tất cả thành công
+                conn.commit();
+            } catch (SQLException e) {
+                // Nếu có lỗi, rollback lại
+                conn.rollback();
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private DinhLuongMonAn mapResultSetToDinhLuong(ResultSet rs) throws SQLException {
         DinhLuongMonAn dl = new DinhLuongMonAn();
         dl.setIdMonAn(rs.getInt("idMonAn"));
@@ -47,6 +81,4 @@ public class DinhLuongMonAnDAL {
         dl.setSoLuongCan(rs.getDouble("soLuongCan"));
         return dl;
     }
-    
-    // Các hàm thêm/xóa công thức sẽ cần cho Tab Quản lý Món ăn sau này
 }

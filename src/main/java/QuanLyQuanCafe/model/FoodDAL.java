@@ -1,10 +1,14 @@
 package QuanLyQuanCafe.model;
 
-import QuanLyQuanCafe.database.DataProvider;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import QuanLyQuanCafe.database.DataProvider;
 
 public class FoodDAL {
     private final DataProvider dataProvider;
@@ -42,32 +46,32 @@ public class FoodDAL {
 
     // Thêm món ăn mới
     public int addFood(Food food) {
-        String query = "INSERT INTO Food (name, categoryId, price, unit, description, isAvailable, imagePath) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = dataProvider.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+    String query = "INSERT INTO Food (name, categoryId, price, unit, description, isAvailable, imagePath) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    try (Connection conn = dataProvider.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, food.getName());
-            stmt.setInt(2, food.getCategoryId());
-            stmt.setLong(3, food.getPrice());
-            stmt.setString(4, food.getUnit());
-            stmt.setString(5, food.getDescription());
-            stmt.setBoolean(6, food.isAvailable());
-            stmt.setString(7, food.getImgName());
+        stmt.setString(1, food.getName());
+        stmt.setInt(2, food.getCategoryId());
+        stmt.setLong(3, food.getPrice());
+        stmt.setString(4, food.getUnit());
+        stmt.setString(5, food.getDescription());
+        stmt.setBoolean(6, food.isAvailable());
+        stmt.setString(7, food.getImgName());
 
-            int affectedRows = stmt.executeUpdate();
+        int affectedRows = stmt.executeUpdate();
 
-            if (affectedRows > 0) {
-                ResultSet keys = stmt.getGeneratedKeys();
+        if (affectedRows > 0) {
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
                 if (keys.next()) {
-                    food.setId(keys.getInt(1));
+                    return keys.getInt(1); // Trả về ID của món vừa thêm
                 }
             }
-            return affectedRows;
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return 0;
+}
 
     // Cập nhật món ăn
     public int updateFood(Food food) {

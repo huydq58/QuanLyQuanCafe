@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -13,78 +14,66 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.FoodTabController">
-    <center>
-        <VBox spacing="10.0" BorderPane.alignment="CENTER">
-            <children>
-                <HBox alignment="CENTER_LEFT">
-                    <children>
-                        <TextField fx:id="searchField" onAction="#handleSearchFood" promptText="Tìm kiếm món ăn..." HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-                <TableView fx:id="foodTableView" VBox.vgrow="ALWAYS">
-                    <columns>
+<ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.FoodTabController">
+   <content>
+      <BorderPane>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <center>
+            <VBox spacing="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <TextField fx:id="searchField" onAction="#handleSearchFood" promptText="Tìm kiếm món ăn theo tên..." />
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Button onAction="#handleAddNewFood" text="Thêm món mới" />
+                        <Button onAction="#handleDeleteFood" styleClass="danger-button" text="Xóa món đã chọn" />
+                     </children>
+                  </HBox>
+                  <TableView fx:id="foodTableView" VBox.vgrow="ALWAYS">
+                     <columns>
                         <TableColumn fx:id="foodIdCol" prefWidth="50.0" text="ID" />
                         <TableColumn fx:id="foodNameCol" prefWidth="150.0" text="Tên món" />
                         <TableColumn fx:id="categoryNameCol" prefWidth="100.0" text="Danh mục" />
                         <TableColumn fx:id="priceCol" prefWidth="100.0" text="Giá" />
-                    </columns>
-                </TableView>
-            </children>
-        </VBox>
-    </center>
-    <right>
-        <VBox prefWidth="350.0" spacing="10.0" styleClass="form-panel" BorderPane.alignment="CENTER">
-            <children>
-                <Label styleClass="form-title" text="CHI TIẾT MÓN ĂN" />
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="ID Món ăn:" />
-                        <TextField fx:id="foodIdField" editable="false" />
-                    </children>
-                </VBox>
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="Tên món:" />
-                        <TextField fx:id="foodNameField" />
-                    </children>
-                </VBox>
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="Danh mục:" />
-                        <ChoiceBox fx:id="categoryChoiceBox" maxWidth="1.7976931348623157E308" />
-                    </children>
-                </VBox>
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="Giá bán:" />
-                        <Spinner fx:id="priceSpinner" editable="true" />
-                    </children>
-                </VBox>
-                <VBox spacing="5.0">
-                    <children>
-                        <Label text="Đường dẫn ảnh:" />
-                        <TextField fx:id="foodImgPathField" />
-                        <ImageView fx:id="foodImg" fitHeight="100.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" />
-                    </children>
-                </VBox>
-                <HBox spacing="10.0">
-                    <children>
-                        <Button fx:id="saveButton" onAction="#handleSaveFood" text="Lưu" HBox.hgrow="ALWAYS" />
-                    </children>
-                </HBox>
-            </children>
-        </VBox>
-    </right>
-    <bottom>
-        <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
-            <children>
-                <Button onAction="#handleAddFood" text="Thêm món mới" />
-                <Button onAction="#handleDeleteFood" styleClass="danger-button" text="Xóa món đã chọn" />
-            </children>
-        </HBox>
-    </bottom>
-    <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-    </padding>
-</BorderPane>
+                     </columns>
+                  </TableView>
+               </children>
+            </VBox>
+         </center>
+         <right>
+            <VBox minWidth="380.0" spacing="10.0" styleClass="form-panel" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets left="10.0" />
+               </BorderPane.margin>
+               <children>
+                  <Label styleClass="form-title" text="CHI TIẾT MÓN ĂN" />
+                  <TextField fx:id="foodIdField" editable="false" promptText="ID Món ăn (tự động)" />
+                  <TextField fx:id="foodNameField" promptText="Tên món ăn..." />
+                  <ChoiceBox fx:id="categoryChoiceBox" maxWidth="1.7976931348623157E308" />
+                  <Spinner fx:id="priceSpinner" editable="true" />
+                  <TextField fx:id="foodImgPathField" promptText="Tên file ảnh (vd: ten_anh.png)" />
+                  <ImageView fx:id="foodImg" fitHeight="80.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true" />
+                  
+                  <Label styleClass="form-title" text="ĐỊNH LƯỢNG NGUYÊN LIỆU" />
+                  <TableView fx:id="recipeTableView" prefHeight="150.0">
+                     <columns>
+                        <TableColumn fx:id="recipeIngredientNameCol" prefWidth="180.0" text="Tên Nguyên Liệu" />
+                        <TableColumn fx:id="recipeQuantityCol" prefWidth="100.0" text="Số Lượng Cần" />
+                        <TableColumn fx:id="recipeDeleteCol" prefWidth="60.0" />
+                     </columns>
+                  </TableView>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <ChoiceBox fx:id="addIngredientChoiceBox" prefWidth="150.0" />
+                        <TextField fx:id="addIngredientQuantityField" promptText="Số lượng" prefWidth="90.0" />
+                        <Button onAction="#handleAddIngredientToRecipe" text="Thêm" HBox.hgrow="ALWAYS" />
+                     </children>
+                  </HBox>
+                  <Button fx:id="saveButton" onAction="#handleSaveFood" text="Lưu thông tin món ăn" HBox.hgrow="ALWAYS" />
+               </children>
+            </VBox>
+         </right>
+      </BorderPane>
+   </content>
+</ScrollPane>
