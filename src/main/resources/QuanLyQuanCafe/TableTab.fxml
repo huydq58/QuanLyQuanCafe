@@ -1,49 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.TableTabController">
-    <children>
-        <AnchorPane prefHeight="400.0" prefWidth="920.0" style="-fx-background-color: #e5b78d;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="91.0">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="QuanLyQuanCafe.controller.TableTabController">
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+    </padding>
+    <center>
+      <VBox spacing="10.0">
+         <children>
+              <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+                  <columns>
+                      <TableColumn fx:id="tableIdCol" prefWidth="75.0" text="ID" />
+                      <TableColumn fx:id="tableNameCol2" prefWidth="250.0" text="Tên Bàn" />
+                      <TableColumn fx:id="tableStatusCol" prefWidth="150.0" text="Trạng thái" />
+                  </columns>
+              </TableView>
+         </children>
+      </VBox>
+    </center>
+    <right>
+        <VBox minWidth="350.0" spacing="15.0" styleClass="form-panel">
+            <BorderPane.margin>
+                <Insets left="10.0" />
+            </BorderPane.margin>
             <children>
-                <TableView fx:id="tableView" prefHeight="400.0" prefWidth="466.0">
-                    <columns>
-                        <TableColumn fx:id="tableIdCol" prefWidth="47.19997787475586" text="ID" />
-                        <TableColumn fx:id="tableNameCol2" prefWidth="198.40003967285156" text="Tên" />
-                        <TableColumn fx:id="tableStatusCol" prefWidth="198.40003967285156" text="Status" />
-                    </columns>
-                </TableView>
-                <VBox layoutX="466.0" layoutY="17.0" prefHeight="245.0" prefWidth="396.0">
+                <Label styleClass="form-title" text="CHI TIẾT BÀN" />
+                <VBox spacing="5.0">
                     <children>
-                        <HBox alignment="CENTER" prefHeight="44.0" prefWidth="280.0" spacing="100.0">
-                            <children>
-                                <Label text="ID" />
-                                <TextField fx:id="tableIdField" editable="false" />
-                            </children>
-                        </HBox>
-                        <HBox alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="44.0" prefWidth="280.0" spacing="100.0">
-                            <children>
-                                <Label text="Tên" />
-                                <TextField fx:id="tableNameField" prefHeight="25.0" prefWidth="157.0" promptText="Tên bàn" />
-                            </children>
-                        </HBox>
-                        <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSaveTable" style="-fx-background-color: #a97550;" text="Lưu" textFill="WHITE">
-                            <font>
-                                <Font name="Calibri Bold" size="16.0" />
-                            </font>
-                        </Button>
+                        <Label text="ID Bàn:" />
+                        <TextField fx:id="tableIdField" disable="true" editable="false" />
                     </children>
                 </VBox>
+                <VBox spacing="5.0">
+                    <children>
+                        <Label text="Tên bàn:" />
+                        <TextField fx:id="tableNameField" />
+                    </children>
+                </VBox>
+                <Button onAction="#handleSaveTable" maxWidth="1.7976931348623157E308" text="Lưu thay đổi" />
             </children>
-        </AnchorPane>
-        <HBox alignment="CENTER" prefHeight="90.0" prefWidth="466.0" spacing="20.0">
-            <children>
-                <Button mnemonicParsing="false" onAction="#handleAddTable" prefHeight="30.0" prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Thêm" />
-                <Button layoutX="228.0" layoutY="34.0" mnemonicParsing="false" onAction="#handleDeleteTable" prefHeight="30.0" prefWidth="86.0" style="-fx-background-color: #e5b78d;" text="Xóa" />
-            </children>
-        </HBox>
-    </children>
-
-</AnchorPane>
+        </VBox>
+    </right>
+   <bottom>
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <children>
+            <Button onAction="#handleAddTable" text="Thêm bàn mới" />
+            <Button onAction="#handleDeleteTable" styleClass="danger-button" text="Xóa bàn đã chọn" />
+         </children>
+         <padding>
+            <Insets top="10.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</BorderPane>

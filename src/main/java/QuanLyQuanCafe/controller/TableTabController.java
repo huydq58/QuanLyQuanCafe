@@ -1,5 +1,8 @@
 package QuanLyQuanCafe.controller;
 
+import QuanLyQuanCafe.database.DataProvider;
+import QuanLyQuanCafe.model.TableFood;
+import QuanLyQuanCafe.model.TableFoodDAL;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -8,115 +11,84 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import  QuanLyQuanCafe.*;
-import  QuanLyQuanCafe.model.*;
-import  QuanLyQuanCafe.database.*;
 
 public class TableTabController {
-    @FXML
-    private TableView<TableFood> tableView;
+    @FXML private TableView<TableFood> tableView;
+    @FXML private TableColumn<TableFood, Integer> tableIdCol;
+    @FXML private TableColumn<TableFood, String> tableNameCol2;
+    @FXML private TableColumn<TableFood, String> tableStatusCol;
+    @FXML private TextField tableIdField;
+    @FXML private TextField tableNameField;
 
-    @FXML
-    private TableColumn<TableFood, Integer> tableIdCol;
-
-    @FXML
-    private TableColumn<TableFood, String> tableNameCol2;
-
-    @FXML
-    private TableColumn<TableFood, String> tableStatusCol;
-
-    @FXML
-    private TextField tableIdField;
-
-    @FXML
-    private TextField tableNameField;
-
-    private DataProvider dataProvider;
+    private TableFoodDAL tableFoodDAL;
+    private TableFood selectedTable;
 
     @FXML
     private void initialize() {
-        System.out.println("Table tab initialized");
-        dataProvider = new DataProvider();
-        loadTables();
+        DataProvider provider = new DataProvider();
+        tableFoodDAL = new TableFoodDAL(provider);
 
-        // Table code
         tableIdCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
-        tableNameCol2
-                .setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-
-        tableStatusCol
-                .setCellValueFactory(cellData -> {
-                    String statusText;
-                    boolean myBoolean = cellData.getValue().isAvailable();
-                    int myInt = myBoolean ? 1 : 0;
-                    switch (myInt) {
-                        case 0:
-                            statusText = "Đang trống";
-                            break;
-                        case 1:
-                            statusText = "Đang sử dụng";
-                            break;
-                        default:
-                            statusText = "";
-                            break;
-                    }
-
-                    return new SimpleStringProperty(statusText);
-                });
-
-        // Set table selection listener
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                populateTableFields(newSelection);
-            }
+        tableNameCol2.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        tableStatusCol.setCellValueFactory(cellData -> {
+            boolean isAvailable = cellData.getValue().isAvailable();
+            return new SimpleStringProperty(isAvailable ? "Đang trống" : "Đang sử dụng");
         });
+
+        tableView.getSelectionModel().selectedItemProperty().addListener(
+            (obs, oldSelection, newSelection) -> populateTableFields(newSelection)
+        );
+        
+        loadTables();
     }
 
     private void loadTables() {
-
-        ObservableList<TableFood> tables = FXCollections.observableArrayList(new TableFoodDAL(dataProvider).getAllTables());
-
+        ObservableList<TableFood> tables = FXCollections.observableArrayList(tableFoodDAL.getAllTables());
         tableView.setItems(tables);
-
-        // Refresh the table view
-        tableView.refresh();
-
-        tableView.getItems().clear();
-        tableView.getItems().addAll(new TableFoodDAL(dataProvider).getAllTables());
     }
 
     private void populateTableFields(TableFood table) {
-        tableIdField.setText(String.valueOf(table.getId()));
-        tableNameField.setText(table.getName());
+        selectedTable = table;
+        if (table == null) {
+            clearForm();
+        } else {
+            tableIdField.setText(String.valueOf(table.getId()));
+            tableNameField.setText(table.getName());
+        }
     }
 
     @FXML
     private void handleAddTable() {
-        TableFood t = new TableFood();
-        TableFoodDAL tableFoodDAL = new TableFoodDAL(dataProvider);
-        t.setId(tableFoodDAL.getTableCount() + 1);
-        t.setName("Bàn " + (tableFoodDAL.getTableCount() + 1));
-        tableFoodDAL.addTable(t);
+        int nextTableNumber = tableFoodDAL.getTableCount() + 1;
+        TableFood newTable = new TableFood();
+        newTable.setName("Bàn " + nextTableNumber);
+        newTable.setAvailable(true);
+        tableFoodDAL.addTable(newTable);
         loadTables();
     }
 
     @FXML
     private void handleDeleteTable() {
-        TableFood selectedTable = tableView.getSelectionModel().getSelectedItem();
-        TableFoodDAL tableFoodDAL = new TableFoodDAL(dataProvider);
         if (selectedTable != null) {
             tableFoodDAL.deleteTable(selectedTable.getId());
             loadTables();
+            clearForm();
         }
     }
 
     @FXML
     private void handleSaveTable() {
-        TableFood selectedTable = tableView.getSelectionModel().getSelectedItem();
         if (selectedTable != null) {
             selectedTable.setName(tableNameField.getText());
+            // Cập nhật trạng thái không đổi ở màn hình này
+            tableFoodDAL.updateTable(selectedTable);
             loadTables();
         }
     }
+    
+    private void clearForm() {
+        tableIdField.clear();
+        tableNameField.clear();
+        selectedTable = null;
+    }
 }
-
