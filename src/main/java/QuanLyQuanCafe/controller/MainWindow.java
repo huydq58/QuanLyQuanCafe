@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javafx.scene.control.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -43,6 +42,19 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
@@ -147,24 +159,48 @@ public class MainWindow {
     }
 
     private void loadCategories() {
-        List<Category> categories = new CategoryDAL(provider).getAllCategories();
-        categoryChoiceBox.setItems(FXCollections.observableArrayList(categories));
+    List<Category> categories = new CategoryDAL(provider).getAllCategories();
+
+    // --- BẮT ĐẦU THAY ĐỔI ---
+    // 1. Tạo một đối tượng Category ảo cho "Tất cả"
+    Category allCategory = new Category();
+    allCategory.setId(0); // Dùng ID 0 hoặc một số âm để nhận biết
+    allCategory.setName("Tất cả");
+
+    // 2. Thêm "Tất cả" vào đầu danh sách
+    List<Category> displayCategories = new ArrayList<>();
+    displayCategories.add(allCategory);
+    displayCategories.addAll(categories);
+    // --- KẾT THÚC THAY ĐỔI ---
+
+    categoryChoiceBox.setItems(FXCollections.observableArrayList(displayCategories));
+    // Tùy chọn: Mặc định chọn "Tất cả" khi khởi động
+    categoryChoiceBox.getSelectionModel().selectFirst();
+}
+
+private void updateFoodDisplay(Category selectedCategory) {
+    danhSachMon.getChildren().clear();
+    List<Food> allFoods = new FoodDAL(provider).getAllFood();
+    List<Food> foodsToDisplay; // Danh sách món ăn sẽ được hiển thị
+
+    // --- BẮT ĐẦU THAY ĐỔI ---
+    // Kiểm tra xem người dùng có chọn "Tất cả" hay không
+    if (selectedCategory != null && selectedCategory.getId() != 0) {
+        // Nếu chọn một danh mục cụ thể -> Lọc như cũ
+        foodsToDisplay = allFoods.stream()
+                .filter(f -> f.getCategoryId() == selectedCategory.getId())
+                .collect(Collectors.toList());
+    } else {
+        // Nếu không chọn gì hoặc chọn "Tất cả" (ID = 0) -> Hiển thị tất cả món ăn
+        foodsToDisplay = allFoods;
     }
+    // --- KẾT THÚC THAY ĐỔI ---
 
-    private void updateFoodDisplay(Category selectedCategory) {
-        danhSachMon.getChildren().clear();
-        List<Food> foods = new FoodDAL(provider).getAllFood();
-
-        if (selectedCategory != null) {
-            foods = foods.stream()
-                    .filter(f -> f.getCategoryId() == selectedCategory.getId())
-                    .collect(Collectors.toList());
-        }
-
-        for (Food food : foods) {
-            loadFoodItem(food);
-        }
+    for (Food food : foodsToDisplay) {
+        loadFoodItem(food);
     }
+}
+
 
     private void loadFoodItem(Food food) {
         try {
