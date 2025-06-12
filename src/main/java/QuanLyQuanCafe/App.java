@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image; // <-- Import thêm lớp Image
 import javafx.stage.Stage;
 
 public class App extends Application{
@@ -15,8 +16,18 @@ public class App extends Application{
     @Override
     public void start(Stage stage) throws Exception {
         scene = new Scene(loadFXML("login"));
-        
         scene.getStylesheets().add(App.class.getResource("styles.css").toExternalForm());
+        
+        // === THÊM ĐOẠN CODE ĐỂ TẢI VÀ ĐẶT ICON CHO ỨNG DỤNG ===
+        try {
+            // Tải icon từ thư mục resources/images
+            Image appIcon = new Image(App.class.getResourceAsStream("/images/logo.png"));
+            stage.getIcons().add(appIcon);
+        } catch (Exception e) {
+            System.err.println("Không thể tải file icon ứng dụng: /images/logo.png");
+            e.printStackTrace();
+        }
+        // =======================================================
         
         stage.setScene(scene);
         stage.setTitle("Coffee Management");
@@ -32,10 +43,8 @@ public class App extends Application{
         Parent root = loadFXML(fxml);
         scene.setRoot(root);
 
-        // Cập nhật kích thước cửa sổ theo từng màn hình
         switch (fxml) {
             case "login":
-                // Kích thước cho màn hình đăng nhập
                 scene.getWindow().setWidth(800);
                 scene.getWindow().setHeight(500);
                 scene.getWindow().centerOnScreen();
@@ -43,14 +52,12 @@ public class App extends Application{
 
             case "MainWindow":
             case "Admin":
-                // Kích thước chuẩn cho các màn hình chính (tương đương tablet)
                 scene.getWindow().setWidth(1100);
                 scene.getWindow().setHeight(700);
                 scene.getWindow().centerOnScreen();
                 break;
                 
             default:
-                // Kích thước mặc định cho các trường hợp khác
                 scene.getWindow().setWidth(800);
                 scene.getWindow().setHeight(600);
                 scene.getWindow().centerOnScreen();
