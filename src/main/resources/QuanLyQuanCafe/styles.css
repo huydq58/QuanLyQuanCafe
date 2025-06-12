@@ -7,6 +7,7 @@
 .root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
     -fx-background-color: #F4EAE0; /* Màu nền chính (be) */
+    -primary-color: #2a73cc;
 }
 
 /* Kiểu dáng chung cho các nút bấm */

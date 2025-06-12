@@ -46,8 +46,8 @@
             </VBox>
             <VBox spacing="5.0">
                <children>
-                  <Label text="Mã nhân viên (tùy chọn):" />
-                  <TextField fx:id="staffIdField" promptText="Nhập số..." />
+                  <Label text="Mã nhân viên :" />
+                  <TextField fx:id="staffIdField" editable="false"/>
                </children>
             </VBox>
             <VBox spacing="5.0">

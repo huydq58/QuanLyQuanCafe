@@ -36,7 +36,7 @@ PRINT 'Dang tao cac bang...';
 CREATE TABLE TaiKhoan (
     TenDangNhap NVARCHAR(50) PRIMARY KEY,
     MatKhauHash NVARCHAR(255) NOT NULL,
-    MaNV INT UNIQUE,
+	MaNV INT IDENTITY(1,1),
     Role NVARCHAR(20) NOT NULL DEFAULT 'NHANVIEN'
 );
 PRINT '- Bang TaiKhoan ... OK';
@@ -141,9 +141,9 @@ PRINT 'Dang chen du lieu mau...';
 -- Tài khoản
 -- Admin: abc / 123
 -- Staff: nhanvien01 / 123
-INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, MaNV, Role) VALUES
-('abc', '$2a$12$jRDyDdHhTjI1QuS735m8cu6yE8sTcrC4t5La3hH49GSam2ItXMgDa', 1, 'QUANLY'),
-('nhanvien01', '$2a$12$J9gL.lF.yO4y5.R7e8s9t.uVwXyZaBcDeFgHiJkLmNoPqRsTuVwX', 2, 'NHANVIEN');
+INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, Role) VALUES
+('abc', '$2a$12$jRDyDdHhTjI1QuS735m8cu6yE8sTcrC4t5La3hH49GSam2ItXMgDa',  'QUANLY'),
+('nhanvien01', '$2a$12$J9gL.lF.yO4y5.R7e8s9t.uVwXyZaBcDeFgHiJkLmNoPqRsTuVwX', 'NHANVIEN');
 PRINT '- Du lieu TaiKhoan ... OK';
 
 -- Danh mục món ăn
@@ -162,7 +162,7 @@ INSERT INTO Food (name, categoryId, price, imagePath) VALUES
 (N'Cà Phê Đen', 1, 20000, 'cafe_den.png'),
 (N'Trà Chanh', 2, 22000, 'tra_chanh.png'),
 (N'Trà Sữa Trân Châu', 2, 30000, 'tra_sua_tran_chau.png'),
-(N'Hướng Dương', 3, 15000, 'huong_duong.png');
+(N'Hướng Dương', 3, 15000, 'huongduong.jpg');
 PRINT '- Du lieu Food ... OK';
 
 -- Nguyên liệu

@@ -108,6 +108,9 @@ public class AccountTabController {
 
     @FXML
     private void handleSaveAccount() {
+        if (selectedAccount == null ) {
+            return;
+        }
         // Lấy dữ liệu từ form
         selectedAccount.setTenDangNhap(usernameField.getText());
         selectedAccount.setRole(roleChoiceBox.getValue());
