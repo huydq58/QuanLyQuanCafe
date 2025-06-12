@@ -2,6 +2,7 @@ package QuanLyQuanCafe.controller;
 
 import QuanLyQuanCafe.crypto.Hashing;
 import QuanLyQuanCafe.database.DataProvider;
+import QuanLyQuanCafe.model.CurrentUserSession;
 import QuanLyQuanCafe.model.TaiKhoan;
 import QuanLyQuanCafe.model.TaiKhoanDAL;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -9,12 +10,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+
+import java.util.Objects;
 
 public class AccountTabController {
 
@@ -30,6 +28,7 @@ public class AccountTabController {
     @FXML private Button saveAccountButton;
 
     private TaiKhoanDAL taiKhoanDAL;
+    private TaiKhoan currentTaiKhoan;
     private TaiKhoan selectedAccount;
     private boolean isNewAccount = false;
 
@@ -37,7 +36,8 @@ public class AccountTabController {
     public void initialize() {
         DataProvider provider = new DataProvider();
         taiKhoanDAL = new TaiKhoanDAL(provider);
-
+        currentTaiKhoan =CurrentUserSession.getInstance().getLoggedInUser();
+        selectedAccount = new TaiKhoan();
         // Cấu hình bảng
         usernameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTenDangNhap()));
         staffIdCol.setCellValueFactory(cellData -> {
@@ -86,12 +86,25 @@ public class AccountTabController {
 
     @FXML
     private void handleDeleteAccount() {
-        if (selectedAccount != null && !isNewAccount) {
-            taiKhoanDAL.deleteTaiKhoan(selectedAccount.getTenDangNhap());
-            loadAccounts();
-            clearForm();
+        if (selectedAccount == null || isNewAccount) {
+            return;
         }
+
+        if (Objects.equals(selectedAccount.getMaNV(), currentTaiKhoan.getMaNV())) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Cảnh báo");
+            alert.setHeaderText("Không thể xóa tài khoản");
+            alert.setContentText("Bạn không thể xóa chính bạn.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Nếu không phải chính mình, tiến hành xóa
+        taiKhoanDAL.deleteTaiKhoan(selectedAccount.getTenDangNhap());
+        loadAccounts();
+        clearForm();
     }
+
 
     @FXML
     private void handleSaveAccount() {

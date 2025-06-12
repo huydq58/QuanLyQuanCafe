@@ -17,6 +17,7 @@ public class LoginController {
 
     @FXML
     private TextField usernameField;
+    public static TaiKhoan currentUser;
 
     @FXML
     private PasswordField passwordField;
