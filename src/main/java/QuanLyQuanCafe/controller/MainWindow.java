@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javafx.scene.control.*;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -42,18 +43,6 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
@@ -75,7 +64,7 @@ public class MainWindow {
     @FXML private TableColumn<OrderItemView, Long> quantityCol, totalPriceCol;
     @FXML private ChoiceBox<Category> categoryChoiceBox;
     @FXML private Spinner<Integer> quantitySpinner;
-    @FXML private Button addFoodButton, gotoAdminButton, thanhToanButton, printBillButton;
+    @FXML private Button addFoodButton, gotoAdminButton, thanhToanButton,signoutButton;
     @FXML private TextField totalPrice, discountField;
     @FXML private TableColumn<OrderItemView, Void> deleteCol;
 
@@ -89,7 +78,6 @@ public class MainWindow {
     @FXML
     public void initialize() {
         thanhToanButton.setDisable(true);
-        printBillButton.setDisable(true);
         totalPrice.setText("");
         loadTables();
         loadAllFoods();
@@ -105,6 +93,11 @@ public class MainWindow {
     @FXML
     private void gotoAdminScreen() throws IOException {
         App.setRoot("Admin");
+    }
+    @FXML
+    private void signOut() throws IOException {
+
+        App.setRoot("Login");
     }
 
     private void loadTables() {
@@ -255,12 +248,10 @@ public class MainWindow {
 
         if (!orderItems.isEmpty()) {
             thanhToanButton.setDisable(false);
-            printBillButton.setDisable(false);
             bangHoaDon.setItems(FXCollections.observableArrayList(orderItems));
         } else {
             bangHoaDon.getItems().clear();
             thanhToanButton.setDisable(true);
-            printBillButton.setDisable(true);
         }
 
         double total = orderItems.stream().mapToDouble(OrderItemView::getTotalPrice).sum();
@@ -359,6 +350,17 @@ public class MainWindow {
             tableDAL.updateTable(table);
             loadTables();
         }
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Xác nhận");
+        confirmAlert.setHeaderText("In hóa đơn");
+        confirmAlert.setContentText("Bạn có muốn in hóa đơn ra file PDF không?");
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            handlePrintBillToPDF();
+        } else {
+            showAlert("Thông báo", "Hủy in hóa đơn.");
+        }
 
         // Reset UI
         discountField.setText("0");
@@ -442,18 +444,26 @@ public class MainWindow {
         alert.showAndWait();
     }
     
-    @FXML
     private void handlePrintBillToPDF() {
         if (orderItems.isEmpty()) {
             showAlert("Thông báo", "Không có gì để in.");
             return;
         }
+        File currentDir = new File(System.getProperty("user.dir"));
+
+        File hoaDonDir = new File(currentDir, "HoaDon");
+        if (!hoaDonDir.exists()) {
+            hoaDonDir.mkdirs();
+        }
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Lưu Hóa Đơn PDF");
+        fileChooser.setInitialDirectory(hoaDonDir); // ← thiết lập thư mục khởi chạy
         fileChooser.setInitialFileName("HoaDon_Ban" + choseTable + "_" + chosenBill + ".pdf");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        File file = fileChooser.showSaveDialog(printBillButton.getScene().getWindow());
+
+
+        File file = fileChooser.showSaveDialog(thanhToanButton.getScene().getWindow());
 
         if (file != null) {
             try (PDDocument document = new PDDocument()) {
@@ -465,7 +475,7 @@ public class MainWindow {
                     contentStream.setFont(PDType1Font.HELVETICA_BOLD, 22);
                     contentStream.setLeading(14.5f);
                     contentStream.newLineAtOffset(50, 750);
-                    
+
                     contentStream.showText(removeDiacritics("HÓA ĐƠN THANH TOÁN"));
                     contentStream.newLine();
                     contentStream.newLine();
@@ -515,10 +525,10 @@ public class MainWindow {
                     contentStream.newLine();
                     contentStream.newLine();
                     contentStream.newLine();
-                    
+
                     contentStream.setFont(PDType1Font.HELVETICA, 10);
                     contentStream.showText(removeDiacritics("Cảm ơn quý khách và hẹn gặp lại!"));
-                    
+
                     contentStream.endText();
                 }
                 document.save(file);

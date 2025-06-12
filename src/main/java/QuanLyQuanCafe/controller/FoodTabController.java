@@ -1,6 +1,10 @@
 package QuanLyQuanCafe.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +35,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 
 public class FoodTabController {
 
@@ -261,6 +266,46 @@ public class FoodTabController {
         SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, initialValue, amountToStepBy);
         spinner.setValueFactory(valueFactory);
     }
-    
+    @FXML
+    private File chooseFoodImg() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters()
+                .add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
+        File selectedFile = fileChooser.showOpenDialog(null);
+
+        if (selectedFile != null) {
+            foodImgPathField.setText(selectedFile.getName());
+            foodImg.setImage(new Image(selectedFile.toURI().toString()));
+            saveImageToFolder(selectedFile);
+        }
+        // else {
+        // selectedFile = new File("images", foodImgPathField.getText());
+        // }
+
+        return selectedFile;
+    }
+    private void saveImageToFolder(File sourceFile) {
+        if (sourceFile != null) {
+            // Define the destination folder within your project
+            File destinationFolder = new File("src\\main\\resources\\images");
+
+            // Create the directory if it doesn't exist
+            if (!destinationFolder.exists()) {
+                destinationFolder.mkdirs();
+            }
+
+            // Define the destination file path
+            File destinationFile = new File(destinationFolder, sourceFile.getName());
+
+            try {
+                // Copy the selected file to the images folder
+                Files.copy(sourceFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Image saved to: " + destinationFile.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @FXML private void handleSearchFood() { /* Tạm thời để trống */ }
 }
